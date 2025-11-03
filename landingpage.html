@@ -5,46 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ManoChitra - Get Started</title>
     
+    <!-- Import the "Press Start 2P" font, which looks like a Minecraft/pixel font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <style>
         /* Basic reset and page setup */
-        html {
-            /* NEW: Set the final black background here */
-            background-color: #000000;
-        }
-
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
             /* 'Press Start 2P' is the pixel font. It requires internet.
-             'Courier New' is a fallback font that works offline and looks blocky.
+              'Courier New' is a fallback font that works offline and looks blocky.
             */
             font-family: 'Press Start 2P', 'Courier New', monospace;
             color: #ffffff;
-            
-            /* 1. Set the background color to TRANSPARENT */
-            /* This allows the z-index: -1 canvas to show through */
-            background-color: transparent; 
-            
-            overflow-x: hidden; /* Prevents horizontal scrollbar */
-        }
+            /* This sets the background.
+              1. A solid black color as a fallback.
+              2. The grid image.
 
-        /* --- New Interactive Background Style --- */
-        #interactive-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Sits behind all other content */
-            /* The canvas itself is drawn on by JS */
-        }
-        /* --- End New Style --- */
+              *** LOCAL FILE INSTRUCTION ***
+              I've set this back to 'bgimg.jpg'.
+              For this to work, you MUST save your 'bgimg.jpg' file
+              in the EXACT SAME FOLDER as this 'index.html' file.
 
+              Folder Structure:
+              /Your-Project-Folder
+                 |-- index.html  (this file)
+                 |-- bgimg.jpg   (your image)
+            */
+            background-color: #000000;
+            background-image: url('bgimg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Keeps the background still on scroll */
+            overflow-x: hidden; /* Prevents horizontal scrollbar from animations */
+        }
 
        /* New Hero Section */
        .hero-section {
@@ -56,16 +53,17 @@
            text-align: center;
            padding: 20px;
            box-sizing: border-box;
-           /* This section is transparent, so the canvas background shows through */
        }
 
         /* Styling for the main title */
         .title {
             /* Responsive font size: min 2rem, scales with 10% of viewport width, max 4rem */
             font-size: clamp(2rem, 10vw, 4rem);
-            color: rgb(14, 219, 51);
+            color: #ffffff;
             
-            margin-bottom: 15px; /* Reduced space to bring subtitle closer */
+            /* The grayish glow effect */
+            
+           margin-bottom: 15px; /* Reduced space to bring subtitle closer */
        }
 
        /* New subtitle style */
@@ -107,7 +105,6 @@
        .features-section {
            padding: 60px 0; /* Space above and below the card grid */
            width: 100%;
-           /* This section is also transparent, letting canvas show around cards */
        }
 
         /* New styles for the feature cards grid */
@@ -134,14 +131,13 @@
            flex-shrink: 0; /* Prevents cards from shrinking */
            max-width: 320px; /* Larger max width */
             box-sizing: border-box;
-            backdrop-filter: blur(5px); /* Frosted glass effect - will blur the canvas! */
+            backdrop-filter: blur(5px); /* Frosted glass effect */
             text-align: left; /* Aligns text to the left inside the card */
 
            /* Animation: Start hidden */
            opacity: 0;
            transform: translateY(40px);
-           transition: opacity 0.6s ease-out, transform 0.6s ease-out,
-                       transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Combined transitions */
+           transition: opacity 0.6s ease-out, transform 0.6s ease-out;
        }
 
        /* Animation: Class to add when visible */
@@ -149,7 +145,7 @@
            opacity: 1;
            transform: translateY(0);
         }
-        
+         
         .feature-card:hover {
             transform: translateY(-5px); /* Lift effect on hover */
             border-color: #888;
@@ -173,7 +169,7 @@
 
 
         /* Custom message box (replaces alert()).
-         It starts as hidden.
+          It starts as hidden.
         */
         .message-box {
             position: fixed;
@@ -221,15 +217,24 @@
 </head>
 <body>
 
-   <!-- New Canvas element for the background -->
-   <canvas id="interactive-background"></canvas>
-
+   <!-- The main hero container (full screen) -->
    <div class="hero-section">
         <h1 class="title">ManoChitra</h1>
-       <p class="subtitle">"AI Powered Visual Knowledge Mapper"</p>
-        <a href="login.html" class="styled-button" id="getStartedButton">Get Started</a>
+       <p class="subtitle">AI Powered Visual Knowledge Mapper</p>
+        <!-- Changed from <button> to <a> and added href="#" -->
+        <a href="/login" class="styled-button" id="getStartedButton">Get Started</a>
+        
+
+<script>
+  document.getElementById("getStartedButton").addEventListener("click", function() {
+    window.location.href = "/login";
+  });
+</script>
+
+
    </div>
 
+   <!-- New Features Section (below the hero) -->
    <div class="features-section">
        <div class="features-grid">
             <div class="feature-card">
@@ -246,180 +251,11 @@
             </div>
         </div>
     </div>
-
-    <div id="messageBox" class="message-box hidden">
-        <p>Thanks for getting started!</p>
-        <button id="closeButton" class="message-box-close">Close</button>
-    </div>
+ 
+    <!-- The hidden message box -->
+   
 
     <script>
-        // --- New "Plexus" Background Logic ---
-
-        const canvas = document.getElementById('interactive-background');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        let particlesArray = [];
-        const numberOfParticles = 80;
-        
-        // Colors
-        const particleColor = 'rgb(14, 219, 51)';
-        const lineColor = 'rgba(40, 120, 60, 0.5)'; // A dimmer green for lines
-
-        // Mouse object to track cursor position
-        const mouse = {
-            x: null,
-            y: null,
-            radius: 150 // Radius of interaction
-        };
-
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
-
-        // Reset mouse position when it leaves the window
-        window.addEventListener('mouseout', () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-
-        // Particle class
-        class Particle {
-            constructor(x, y, size, color, vx, vy) {
-                this.x = x;
-                this.y = y;
-                this.size = size;
-                this.color = color;
-                this.vx = vx;
-                this.vy = vy;
-            }
-
-            // Draw the particle
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            // Update particle logic
-            update() {
-                // Bounce off edges
-                if (this.x + this.size > canvas.width || this.x - this.size < 0) {
-                    this.vx = -this.vx;
-                }
-                if (this.y + this.size > canvas.height || this.y - this.size < 0) {
-                    this.vy = -this.vy;
-                }
-                
-                // Update position
-                this.x += this.vx;
-                this.y += this.vy;
-
-                this.draw();
-            }
-        }
-
-
-        // Create particle array
-        function init() {
-            particlesArray = [];
-            
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = Math.random() * 2 + 1; // 1 to 3
-                let x = Math.random() * canvas.width;
-                let y = Math.random() * canvas.height;
-                let vx = (Math.random() - 0.5) * 0.5; // Slow velocity
-                let vy = (Math.random() - 0.5) * 0.5;
-                particlesArray.push(new Particle(x, y, size, particleColor, vx, vy));
-            }
-        }
-
-        // Draw lines between particles
-        function connect() {
-            let maxDistance = 100; // Max distance to draw a line
-            ctx.strokeStyle = lineColor;
-
-            for (let a = 0; a < particlesArray.length; a++) {
-                // Connect to other particles
-                for (let b = a + 1; b < particlesArray.length; b++) {
-                    let dx = particlesArray[a].x - particlesArray[b].x;
-                    let dy = particlesArray[a].y - particlesArray[b].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < maxDistance) {
-                        // Set opacity based on distance
-                        let opacity = 1 - (distance / maxDistance);
-                        ctx.strokeStyle = `rgba(40, 120, 60, ${opacity * 0.8})`; // Faint green (NOW BRIGHTER)
-                        
-                        ctx.lineWidth = 2; // (NOW THICKER)
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
-                    }
-                }
-                
-                // Connect to mouse
-                if (mouse.x !== null) {
-                    let dx = particlesArray[a].x - mouse.x;
-                    let dy = particlesArray[a].y - mouse.y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < mouse.radius) {
-                        let opacity = 1 - (distance / mouse.radius);
-                        ctx.strokeStyle = `rgba(14, 219, 51, ${opacity * 0.9})`; // Brighter green for mouse (NOW BRIGHTER)
-                        
-                        ctx.lineWidth = 2; // (NOW THICKER)
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
-
-
-        // Animation loop
-        function animate() {
-            // Clear the canvas. No trails for this one.
-            // FIX: Replaced clearRect with fillRect to ensure background is black
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Update and draw all particles
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-            }
-            
-            // Draw the connecting lines
-            connect();
-            
-            // Request the next frame
-            requestAnimationFrame(animate);
-        }
-
-        // Handle window resizing
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Re-create particles for the new size
-            init(); 
-        });
-
-        // --- Start the animation ---
-        init();
-        animate();
-
-        // --- End New Background Logic ---
-
-
-        // --- Existing Page Logic ---
-
         // Get references to the HTML elements
         const getStartedButton = document.getElementById('getStartedButton');
         const messageBox = document.getElementById('messageBox');
@@ -427,16 +263,13 @@
 
         // Show the message box when "Get Started" is clicked
         getStartedButton.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevents the link from navigating immediately
+            event.preventDefault(); // Prevents the link from navigating
             messageBox.classList.remove('hidden');
         });
 
-        // Hide the message box when "Close" is clicked, then navigate
+        // Hide the message box when "Close" is clicked
         closeButton.addEventListener('click', () => {
             messageBox.classList.add('hidden');
-            // This line navigates to the href from the "Get Started" 
-            // button *after* you close the popup.
-            window.location.href = getStartedButton.href;
         });
 
        // --- Scroll Animation Logic ---
@@ -448,7 +281,7 @@
        const observer = new IntersectionObserver((entries) => {
            entries.forEach(entry => {
                // If the card is on screen
-               if (entry.isIntersecting) { 
+               if (entry.isIntersecting) {
                    // Add the 'is-visible' class to trigger the animation
                    entry.target.classList.add('is-visible');
                    // Stop observing this card once it's visible
@@ -467,6 +300,4 @@
 
 </body>
 </html>
-
-
 
