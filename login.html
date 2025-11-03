@@ -4,20 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Manochitra</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Inter font from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         /* Apply Inter font as the default */
         body {
             font-family: 'Inter', sans-serif;
+        }
+        /* Style for Minecraft text */
+        .minecraft-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* Animation for Manochitra text */
+        .manochitra-animated span {
+            opacity: 0;
+            animation: revealLetter 0.5s forwards;
+        }
+
+        /* Define animation delays for each letter (reversed for reverse alphabetical order) */
+        .manochitra-animated span:nth-child(10) { /* A */ animation-delay: 0.1s; }
+        .manochitra-animated span:nth-child(9) {  /* R */ animation-delay: 0.2s; }
+        .manochitra-animated span:nth-child(8) {  /* T */ animation-delay: 0.3s; }
+        .manochitra-animated span:nth-child(7) {  /* I */ animation-delay: 0.4s; }
+        .manochitra-animated span:nth-child(6) {  /* H */ animation-delay: 0.5s; }
+        .manochitra-animated span:nth-child(5) {  /* C */ animation-delay: 0.6s; }
+        .manochitra-animated span:nth-child(4) {  /* O */ animation-delay: 0.7s; }
+        .manochitra-animated span:nth-child(3) {  /* N */ animation-delay: 0.8s; }
+        .manochitra-animated span:nth-child(2) {  /* A */ animation-delay: 0.9s; }
+        .manochitra-animated span:nth-child(1) {  /* M */ animation-delay: 1.0s; }
+
+        @keyframes revealLetter {
+            from {
+                opacity: 0;
+                transform: translateY(-10px); /* Optional: slight movement effect */
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Styles for the 3D background canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Place it behind all other content */
+        }
+
+        /* ADDED: Frosted glass effect for the separator text background */
+        .frosted-separator {
+            backdrop-filter: blur(5px); /* Adjust blur strength as needed */
+            background-color: rgba(255, 255, 255, 0.1); /* Very slight white tint */
+            padding: 0 0.5rem; /* Re-add padding that was removed by bg-transparent */
+            border-radius: 0.25rem; /* Slight rounding for the background */
+        }
+        /* ADDED: Custom styles for transparent inputs */
+        .transparent-input {
+            background-color: rgba(255, 255, 255, 0.05); /* Very slight background tint */
+            border-color: rgba(255, 255, 255, 0.3); /* Lighter border */
+            color: white; /* Input text color */
+        }
+        .transparent-input::placeholder {
+            color: rgba(255, 255, 255, 0.5); /* Lighter placeholder text */
+        }
+        .transparent-input:focus {
+            border-color: rgba(255, 255, 255, 0.7);
+            --tw-ring-color: rgba(99, 102, 241, 0.5); /* Lighter indigo ring */
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly more visible on focus */
         }
     </style>
     <script>
@@ -33,50 +94,50 @@
         }
     </script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-    <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-xl m-4">
+<body class="flex items-center justify-center min-h-screen">
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- MODIFIED: Removed bg-white, shadow-lg from this div -->
+    <div class="w-full max-w-md p-8 space-y-8 m-4 rounded-xl z-10"> 
         
-        <!-- Header Section -->
         <div class="text-center">
-            <h1 class="text-4xl font-bold text-indigo-600">Manochitra</h1>
-            <p class="mt-2 text-gray-500">AI Powered Mind Maps for Aspirants</p>
+            <!-- MODIFIED: Changed text-indigo-600 to text-white -->
+            <h1 class="text-4xl font-bold text-white minecraft-font manochitra-animated">
+                <span>M</span><span>A</span><span>N</span><span>O</span><span>C</span><span>H</span><span>I</span><span>T</span><span>R</span><span>A</span>
+            </h1>
         </div>
 
-        <!-- Login Form -->
         <form id="loginForm" class="space-y-6">
             
-            <h2 class="text-2xl font-semibold text-gray-900 text-center">Welcome Back!</h2>
-            
-            <!-- Email Input -->
             <div>
                 <label for="email" class="text-sm font-medium text-gray-700 sr-only">Email address</label>
+                <!-- MODIFIED: Removed explicit text/placeholder colors, removed border-gray-300, added bg-transparent and custom class -->
                 <input id="email" name="email" type="email" autocomplete="email" required
-                       class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                       class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:border-transparent transparent-input"
                        placeholder="Email address">
             </div>
 
-            <!-- Password Input -->
-            <div>
+            <div class="relative w-full">
                 <label for="password" class="text-sm font-medium text-gray-700 sr-only">Password</label>
+                <!-- MODIFIED: Removed explicit text/placeholder colors, removed border-gray-300, added bg-transparent and custom class -->
                 <input id="password" name="password" type="password" autocomplete="current-password" required
-                       class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                       class="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:border-transparent transparent-input"
                        placeholder="Password">
             </div>
 
-            <!-- Forgot Password Link -->
             <div class="flex items-center justify-end">
                 <div class="text-sm">
-                    <a id="forgotPasswordLink" href="#" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                    <!-- MODIFIED: Changed link color to white/gray for better contrast on dark bg -->
+                    <a id="forgotPasswordLink" href="#" class="font-medium text-gray-200 hover:text-white hover:underline">
                         Forgot your password?
                     </a>
                 </div>
             </div>
 
-            <!-- Message Area -->
             <div id="messageArea" class="text-sm text-center font-medium hidden"></div>
 
-            <!-- Login Button -->
             <div>
                 <button type="submit"
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
@@ -84,23 +145,22 @@
                 </button>
             </div>
 
-            <!-- Separator -->
             <div class="relative">
                 <div class="absolute inset-0 flex items-center">
                     <div class="w-full border-t border-gray-300"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white text-gray-500">
+                    <!-- MODIFIED: Changed bg-white to bg-transparent and added frosted-separator class -->
+                    <span class="text-gray-300 frosted-separator"> <!-- Changed text-gray-500 to 300 -->
                         Or continue with
                     </span>
                 </div>
             </div>
 
-            <!-- Google Sign-In Button -->
             <div>
+                <!-- MODIFIED: Changed styles for Google Sign-In button to be transparent -->
                 <button type="button" id="googleSignIn"
-                        class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
-                    <!-- Google SVG Icon -->
+                        class="w-full flex items-center justify-center py-3 px-4 border border-gray-500 rounded-lg shadow-sm text-base font-medium text-gray-200 bg-white/10 hover:bg-white/20 backdrop-filter backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-300 transition-colors duration-200">
                     <svg class="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                         <path fill="#4285F4" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
                         <path fill="#34A853" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8V44c5.842,0,11.234-1.834,15.541-5.186l-5.657-5.657C34.046,36.053,29.268,38,24,38c-3.187,0-6.057-1.07-8.406-2.846l-5.657,5.657C14.07,43.43,18.817,44,24,44c5.183,0,9.915-1.35,13.88-3.917C41.7,36.708,44,30.838,44,24C44,22.659,43.862,21.35,43.611,20.083z"></Spath>
@@ -112,133 +172,265 @@
             </div>
         </form>
         
-        <!-- Sign Up Link -->
-        <p class="mt-8 text-center text-sm text-gray-600">
+        <!-- MODIFIED: Changed text color for better contrast -->
+        <p class="mt-8 text-center text-sm text-gray-300"> <!-- Changed text-gray-600 to 300 -->
             Don't have an account?
-            <a id="signUpLink" href="#" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+            <!-- MODIFIED: Changed link color for better contrast -->
+            <a id="signUpLink" href="#" class="font-medium text-gray-100 hover:text-white hover:underline"> <!-- Changed text-indigo-600 -->
                 Sign Up
             </a>
         </p>
 
     </div>
 
-    <!-- Firebase Configuration -->
-    <script src="{{ url_for('static', filename='firebase-config.js') }}"></script>
+    <script type="module">
+        // Import Firebase v11 modular SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged, 
+            signInWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithPopup, 
+            sendPasswordResetEmail,
+            signInWithCustomToken,
+            signInAnonymously,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    <script>
-        // Get form and message elements
+        // --- Firebase Initialization ---
+        // Get config from environment variables provided by the platform
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let auth;
+        let googleProvider;
+
+        try {
+            const firebaseConfig = JSON.parse(firebaseConfigStr);
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            googleProvider = new GoogleAuthProvider();
+            setLogLevel('Debug'); // For detailed auth logs in console
+        } catch (error) {
+            console.error("Error initializing Firebase:", error);
+            showMessage("Could not connect to services. Please refresh.", "error");
+            // If Firebase fails, don't try to run the rest of the script
+            // return; // Cannot use return in top-level module
+        }
+
+        // --- Get UI Elements ---
         const loginForm = document.getElementById('loginForm');
         const messageArea = document.getElementById('messageArea');
-        
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in, redirect to frontpage
-                window.location.href = '/frontpage';
-            }
-        });
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const googleSignInButton = document.getElementById('googleSignIn');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const signUpLink = document.getElementById('signUpLink');
 
-        // Helper function to show messages
+        // --- Helper function to show messages ---
         function showMessage(message, type = 'info') {
-            messageArea.textContent = message;
-            messageArea.classList.remove('hidden', 'text-gray-600', 'text-red-600', 'text-green-600', 'text-indigo-600');
-            if (type === 'error') {
-                messageArea.classList.add('text-red-600');
-            } else if (type === 'success') {
-                messageArea.classList.add('text-green-600');
+            if (messageArea) { 
+                messageArea.textContent = message;
+                messageArea.classList.remove('hidden', 'text-gray-600', 'text-red-600', 'text-green-600', 'text-indigo-600');
+                // MODIFIED: Make message colors lighter for dark background
+                if (type === 'error') {
+                    messageArea.classList.add('text-red-400'); // Lighter red
+                } else if (type === 'success') {
+                    messageArea.classList.add('text-green-400'); // Lighter green
+                } else {
+                    messageArea.classList.add('text-gray-200'); // Lighter gray
+                }
             } else {
-                messageArea.classList.add('text-gray-600');
+                console.warn("messageArea element not found. Message:", message);
             }
         }
 
-        // Email/Password Login
-        loginForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            showMessage('Signing in...', 'info');
-            
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                showMessage('Success! Redirecting...', 'success');
-                // Redirect will happen automatically via onAuthStateChanged
-            } catch (error) {
-                console.error('Login error:', error);
-                let errorMessage = 'Failed to sign in. Please try again.';
+        if (auth) { // Only run auth logic if initialization was successful
+            // --- Mandatory Auth Sign-in ---
+            (async () => {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Automatic sign-in error:", error);
+                    showMessage("Connection error. Please refresh.", "error");
+                }
+            })();
+
+            // --- Auth State Change Listener ---
+            onAuthStateChanged(auth, (user) => {
+                if (user && !user.isAnonymous) {
+                    console.log("User signed in, redirecting:", user.email);
+                    showMessage('Success! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/frontpage';
+                    }, 1500);
+                } else if (user && user.isAnonymous) {
+                    console.log("User is signed in anonymously. Staying on login page.");
+                } else {
+                    console.log("No user signed in (or user signed out).");
+                }
+            });
+
+            // --- Event Listeners ---
+
+            // Email/Password Login
+            loginForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                showMessage('Signing in...', 'info');
                 
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = 'No account found with this email.';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'Incorrect password. Please try again.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'Invalid email address.';
-                        break;
-                    case 'auth/user-disabled':
-                        errorMessage = 'This account has been disabled.';
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMessage = 'Too many failed attempts. Please try again later.';
-                        break;
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                } catch (error) {
+                    console.error('Login error:', error);
+                    let errorMessage = 'Failed to sign in. Please try again.';
+                    switch (error.code) {
+                        case 'auth/invalid-credential':
+                        case 'auth/user-not-found':
+                        case 'auth/wrong-password':
+                            errorMessage = 'Incorrect email or password.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'Invalid email address.';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = 'This account has been disabled.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Too many failed attempts. Please try again later.';
+                            break;
+                    }
+                    showMessage(errorMessage, 'error');
+                }
+            });
+
+            // Google Sign-In
+            googleSignInButton.addEventListener('click', async (e) => {
+                e.preventDefault();
+                showMessage('Redirecting to Google Sign-In...', 'info');
+                
+                try {
+                    const result = await signInWithPopup(auth, googleProvider);
+                } catch (error) {
+                    console.error('Google Sign-In error:', error);
+                    let errorMessage = 'Failed to sign in with Google.';
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        errorMessage = 'Sign-in cancelled.';
+                    } else if (error.code === 'auth/popup-blocked') {
+                        errorMessage = 'Popup blocked. Please allow popups for this site.';
+                    }
+                    showMessage(errorMessage, 'error');
+                }
+            });
+
+            // Forgot Password
+            forgotPasswordLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const email = emailInput.value;
+                
+                if (!email) {
+                    showMessage('Please enter your email address first.', 'error');
+                    return;
                 }
                 
-                showMessage(errorMessage, 'error');
-            }
-        });
-
-        // Google Sign-In
-        document.getElementById('googleSignIn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            showMessage('Redirecting to Google Sign-In...', 'info');
-            
-            try {
-                const result = await auth.signInWithPopup(googleProvider);
-                showMessage('Success! Redirecting...', 'success');
-                // Redirect will happen automatically via onAuthStateChanged
-            } catch (error) {
-                console.error('Google Sign-In error:', error);
-                let errorMessage = 'Failed to sign in with Google.';
-                
-                if (error.code === 'auth/popup-closed-by-user') {
-                    errorMessage = 'Sign-in cancelled.';
-                } else if (error.code === 'auth/popup-blocked') {
-                    errorMessage = 'Popup blocked. Please allow popups for this site.';
+                try {
+                    await sendPasswordResetEmail(auth, email);
+                    showMessage('Password reset email sent! Check your inbox.', 'success');
+                } catch (error) {
+                    console.error('Password reset error:', error);
+                    let errorMessage = 'Failed to send reset email. Please check your email address.';
+                     if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                         errorMessage = 'No account found with this email address.';
+                     }
+                    showMessage(errorMessage, 'error');
                 }
-                
-                showMessage(errorMessage, 'error');
-            }
-        });
+            });
+        } // End of if(auth) block
 
-        // Forgot Password
-        document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            
-            if (!email) {
-                showMessage('Please enter your email address first.', 'error');
-                return;
-            }
-            
-            try {
-                await auth.sendPasswordResetEmail(email);
-                showMessage('Password reset email sent! Check your inbox.', 'success');
-            } catch (error) {
-                console.error('Password reset error:', error);
-                showMessage('Failed to send reset email. Please check your email address.', 'error');
-            }
-        });
-
-        // Sign Up Link
-        document.getElementById('signUpLink').addEventListener('click', (e) => {
+        // Sign Up Link (no auth needed)
+        signUpLink.addEventListener('click', (e) => {
             e.preventDefault();
             window.location.href = '/signup';
         });
 
     </script>
 
+    <script type="module">
+        // Import Three.js from CDN
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+
+        // --- Basic Setup ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.getElementById('bg-canvas'),
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
+        // Set a very dark background (almost black)
+        scene.background = new THREE.Color(0x000010); 
+        camera.position.z = 50; // Move camera back to see the particles
+
+        // --- Create Particles ---
+        const particleCount = 10000; // Number of particles
+        const vertices = [];
+        for (let i = 0; i < particleCount; i++) {
+            // Create random x, y, z coordinates in a cube
+            const x = (Math.random() - 0.5) * 100;
+            const y = (Math.random() - 0.5) * 100;
+            const z = (Math.random() - 0.5) * 100;
+            vertices.push(x, y, z);
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+        const material = new THREE.PointsMaterial({
+            color: 0x00008b, // Your requested "dark blue" color
+            size: 0.1,       // Size of each particle
+            sizeAttenuation: true, // Particles shrink with distance
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock(); // Use clock for smooth, time-based animation
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+
+            // Gently rotate the particle system
+            particles.rotation.y = elapsedTime * 0.05;
+            particles.rotation.x = elapsedTime * 0.02;
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+        animate(); // Start the animation loop
+
+        // --- Handle Window Resize ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener('resize', onWindowResize);
+    </script>
+
 </body>
 </html>
+
