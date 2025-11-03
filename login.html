@@ -5,38 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Manochitra</title>
     <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- ADDED: Load three.js for 3D animation --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Load Inter font from Google Fonts --><link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- ADDED: Load the 'Press Start 2P' font for a pixel/Minecraft look --><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- Load the 'Press Start 2P' font for a pixel/Minecraft look --><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
     <style>
         /* Apply Inter font as the default */
         body {
             font-family: 'Inter', sans-serif;
+            overflow: hidden; /* ADDED: Prevent scrolling */
         }
-        /* ADDED: Custom style for the Minecraft-style title */
+        /* Custom style for the Minecraft-style title */
         .minecraft-font {
             font-family: 'Press Start 2P', cursive;
-            /* Note: Press Start 2P is best viewed with a larger font size */
         }
-        /* NEW: Custom color for the Manochitra title */
+        /* Custom color for the Manochitra title */
         .manochitra-color {
             color: rgb(14, 219, 51);
         }
-        /* UPDATED: Custom styles for the grid background */
+        /* UPDATED: Removed background image, set to solid black */
         .grid-background {
-            background-image: url(bgimg.png);
-            background-size: cover; /* Ensures the image covers the entire background */
-            background-position: center;
-            background-attachment: fixed; /* Makes the background fixed while content scrolls */
+            /* background-image: url(...); REMOVED */
             min-height: 100vh; /* Ensure it covers the full viewport height */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #000; /* Fallback for transparency */
+            background-color: #000; /* Solid black background */
         }
-        /* NOTE: The .transparent-box CSS definition has been removed to un-box the form content. */
+        /* ADDED: Style for the 3D canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* Place it behind the content */
+        }
     </style>
     <script>
         // Optional: Custom Tailwind configuration
@@ -53,43 +60,56 @@
 </head>
 <body class="grid-background">
 
-    <!-- Removed transparent-box, rounded-xl, and shadow-xl classes to un-box the form --><div class="w-full max-w-sm p-8 space-y-8 m-4">
+    <!-- ADDED: Canvas for the 3D background animation -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main content container - ADDED: z-index to ensure it's on top -->
+    <div class="w-full max-w-sm p-8 space-y-8 m-4" style="z-index: 1;">
         
-        <!-- Header Section: Changed text-4xl to text-5xl, text-white to manochitra-color, and added 'minecraft-font' class --><div class="text-center">
-            <h1 class="text-3xl font-bold manochitra-color minecraft-font">ManoChitra</h1>
+        <!-- Header Section -->
+        <div class="text-center">
+            <!-- ADDED: id="animated-title" -->
+            <h1 id="animated-title" class="text-3xl font-bold manochitra-color minecraft-font">ManoChitra</h1>
         </div>
 
-        <!-- Login Form --><form id="loginForm" class="space-y-6">
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
             
-            <!-- Email Input with Clear Button (Now uses bg-gray-700) --><div class="relative">
-                <!-- Updated label: added 'block', 'font-bold', and 'text-gray-200' and removed 'sr-only' --><label for="email" class="block text-sm font-bold text-gray-200 mb-1">Email address</label>
+            <!-- Email Input -->
+            <div class="relative">
+                <label for="email" class="block text-sm font-bold text-gray-200 mb-1">Email address</label>
                 <input id="email" name="email" type="email" autocomplete="email" required
-                       class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                       placeholder="Email address">
-                <button type="button" id="emailClearBtn" class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none text-gray-400 hover:text-gray-200 hidden">
-                    <!-- Clear Icon (X) --><svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                        placeholder="Email address">
+                <button type="button" id="emailClearBtn" class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none text-gray-400 hover:text-gray-200 hidden" style="top: 1.75rem;">
+                    <!-- Clear Icon (X) -->
+                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Password Input with Show/Hide Toggle (Now uses bg-gray-700) --><div class="relative">
-                <!-- Updated label: added 'block', 'font-bold', and 'text-gray-200' and removed 'sr-only' --><label for="password" class="block text-sm font-bold text-gray-200 mb-1">Password</label>
+            <!-- Password Input -->
+            <div class="relative">
+                <label for="password" class="block text-sm font-bold text-gray-200 mb-1">Password</label>
                 <input id="password" name="password" type="password" autocomplete="current-password" required
-                       class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                       placeholder="Password">
-                <button type="button" id="passwordToggle" class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none text-gray-400 hover:text-gray-200">
-                    <!-- Eye Icon (Open by default - visible password) --><svg id="eyeOpen" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                        placeholder="Password">
+                <button type="button" id="passwordToggle" class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none text-gray-400 hover:text-gray-200" style="top: 1.75rem;">
+                    <!-- Eye Icon (Open) -->
+                    <svg id="eyeOpen" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    <!-- Eye Slash Icon (Closed by default - hidden password) --><svg id="eyeClosed" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Eye Slash Icon (Closed) -->
+                    <svg id="eyeClosed" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.828c-1.803.957-3.923 1.15-5.973.568A8.09 8.09 0 0110.875 12c.57.808 1.157 1.63 1.615 2.502M4.938 12c1.274-4.057 5.065-7 9.542-7 1.284 0 2.524.225 3.674.659M18.894 17.519L12 12M5.462 20.538l12-12" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Forgot Password Link: Changed text-indigo-* to text-gray-* --><div class="flex items-center justify-end">
+            <!-- Forgot Password Link -->
+            <div class="flex items-center justify-end">
                 <div class="text-sm">
                     <a id="forgotPasswordLink" href="#" class="font-medium text-gray-400 hover:text-gray-300 hover:underline">
                         Forgot your password?
@@ -97,30 +117,35 @@
                 </div>
             </div>
 
-            <!-- Message Area --><div id="messageArea" class="text-sm text-center font-medium hidden"></div>
+            <!-- Message Area -->
+            <div id="messageArea" class="text-sm text-center font-medium hidden"></div>
 
-            <!-- Login Button: Changed bg-indigo-* to bg-gray-* and focus ring to gray-500 --><div>
+            <!-- Login Button -->
+            <div>
                 <button type="submit"
                         class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
                     Sign In
                 </button>
             </div>
 
-            <!-- Separator --><div class="relative">
+            <!-- Separator -->
+            <div class="relative">
                 <div class="absolute inset-0 flex items-center">
                     <div class="w-full border-t border-gray-600"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                    <!-- Added bg-black/70 and rounded-md to ensure legibility on the smoky background --><span class="px-2 text-gray-200 bg-black/70 rounded-md">
+                    <span class="px-2 text-gray-200 bg-black/70 rounded-md">
                         Or continue with
                     </span>
                 </div>
             </div>
 
-            <!-- Google Sign-In Button: Updated focus ring to gray-500 --><div>
+            <!-- Google Sign-In Button -->
+            <div>
                 <button type="button" id="googleSignIn"
                         class="w-full flex items-center justify-center py-3 px-4 border border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-200 bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200">
-                    <!-- Google SVG Icon (Corrected for proper color display) --><svg class="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                    <!-- Google SVG Icon -->
+                    <svg class="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                         <path fill="#4285F4" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
                         <path fill="#34A853" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8V44c5.842,0,11.234-1.834,15.541-5.186l-5.657-5.657C34.046,36.053,29.268,38,24,38c-3.187,0-6.057-1.07-8.406-2.846l-5.657,5.657C14.07,43.43,18.817,44,24,44c5.183,0,9.915-1.35,13.88-3.917C41.7,36.708,44,30.838,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
                         <path fill="#FBBC05" d="M15.594,29.154l5.657-5.657C20.06,21.94,19.2,19.2,19.2,16c0-3.2,0.86-6.06,2.301-8.406l-5.657-5.657C12.56,6.053,10.183,10.662,10.183,16c0,5.338,2.377,9.947,6.057,13.154H15.594z"></path>
@@ -131,7 +156,8 @@
             </div>
         </form>
         
-        <!-- Sign Up Link: Changed text-indigo-* to text-gray-* --><p class="mt-8 text-center text-sm text-gray-200">
+        <!-- Sign Up Link -->
+        <p class="mt-8 text-center text-sm text-gray-200">
             Don't have an account?
             <a id="signUpLink" href="manochitra_signup.html" class="font-medium text-gray-400 hover:text-gray-300 hover:underline">
                 Sign Up
@@ -140,7 +166,7 @@
 
     </div>
     <script>
-        // Get form and message elements
+        // --- FIXED: Define ALL element constants at the top ---
         const loginForm = document.getElementById('loginForm');
         const messageArea = document.getElementById('messageArea');
         const emailInput = document.getElementById('email');
@@ -149,14 +175,13 @@
         const passwordToggle = document.getElementById('passwordToggle');
         const eyeOpen = document.getElementById('eyeOpen');
         const eyeClosed = document.getElementById('eyeClosed');
-
-
+        
+        // --- ALL SCRIPT LOGIC (FORM, LINKS, ALERTS) ---
+        
         // --- Password Toggle Functionality ---
         passwordToggle.addEventListener('click', () => {
             const isPassword = passwordInput.type === 'password';
             passwordInput.type = isPassword ? 'text' : 'password';
-            
-            // Toggle icons
             eyeOpen.classList.toggle('hidden', !isPassword);
             eyeClosed.classList.toggle('hidden', isPassword);
         });
@@ -167,82 +192,165 @@
             emailClearBtn.classList.add('hidden');
             emailInput.focus();
         });
-
         emailInput.addEventListener('input', () => {
-            // Show clear button only if input has content
             emailClearBtn.classList.toggle('hidden', emailInput.value.length === 0);
         });
 
-
-        // Add event listener for form submission
+        // --- Form Submit ---
         loginForm.addEventListener('submit', (event) => {
-            event.preventDefault(); // Prevent the form from actually submitting
-            
+            event.preventDefault(); 
             const email = emailInput.value;
             const password = passwordInput.value;
-            
-            // Clear previous messages
             messageArea.textContent = '';
             messageArea.classList.add('hidden');
             messageArea.classList.remove('text-green-600', 'text-red-600', 'text-indigo-600');
-
-            // --- Mock Login Logic ---
             console.log('Login attempt:', { email, password });
-
-            // Show a loading message (optional)
             messageArea.textContent = 'Signing in...';
             messageArea.classList.remove('hidden');
-            messageArea.classList.add('text-gray-200'); // Adjusted color for dark background
-            
-            // Simulate an API call
+            messageArea.classList.add('text-gray-200'); 
             setTimeout(() => {
-                // Use a simple mock login success condition
                 if (email === 'test@example.com' && password === 'password123') {
-                    // Successful login
                     messageArea.textContent = 'Success! Redirecting to dashboard...';
                     messageArea.classList.remove('text-gray-200', 'text-red-600');
-                    messageArea.classList.add('text-green-400'); // Kept green for success, as it's universally recognized
-                    // In a real app, you would redirect here:
-                    // window.location.href = '/dashboard'; 
+                    messageArea.classList.add('text-green-400'); 
                 } else {
-                    // Failed login
                     messageArea.textContent = 'Invalid email or password. Please try again.';
                     messageArea.classList.remove('text-gray-200', 'text-green-400');
-                    messageArea.classList.add('text-red-400'); // Kept red for error
+                    messageArea.classList.add('text-red-400'); 
                 }
             }, 1500);
         });
 
-        // A small override for the demo alerts, as per instructions.
+        // --- Alert Override ---
         function alert(message) {
             messageArea.textContent = message;
             messageArea.classList.remove('hidden', 'text-red-400', 'text-green-400');
-            messageArea.classList.add('text-gray-300'); // Changed alert color to muted gray
+            messageArea.classList.add('text-gray-300');
         }
 
-        // Add mock listeners for other links
+        // --- Mock Link Listeners ---
         document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
             e.preventDefault();
             console.log('Forgot Password link clicked');
             alert('This would navigate to the password reset page.'); 
         });
-
         document.getElementById('googleSignIn').addEventListener('click', (e) => {
             e.preventDefault();
             console.log('Google Sign-In clicked');
             messageArea.textContent = 'Redirecting to Google Sign-In...';
             messageArea.classList.remove('hidden', 'text-red-400', 'text-green-400');
-            messageArea.classList.add('text-gray-200'); // Adjusted color
-            // This would trigger the Google OAuth flow
+            messageArea.classList.add('text-gray-200');
         });
-
         document.getElementById('signUpLink').addEventListener('click', (e) => {
             e.preventDefault();
             console.log('Sign Up link clicked (manochitra_signup.html)');
             alert('Navigating to the Sign Up page (manochitra_signup.html).');
         });
 
+        // --- 3D Particle & Text Scramble ---
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Text Scramble Effect for Title ---
+            const titleElement = document.getElementById('animated-title');
+            if (titleElement) {
+                const originalText = "ManoChitra";
+                const scrambleChars = "artihConaM"; // Use the same reversed characters
+                const animationSpeed = 50; // ms per character change
+                const nextAnimationDelay = 3000; // ms to wait before re-scrambling
+
+                function scrambleText(element, text) {
+                    let iterations = 0;
+                    const interval = setInterval(() => {
+                        element.textContent = text.split("")
+                            .map((letter, index) => {
+                                if (index < iterations) {
+                                    return text[index];
+                                }
+                                return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+                            })
+                            .join("");
+
+                        if (iterations >= text.length) {
+                            clearInterval(interval);
+                            element.textContent = text; // Ensure final text is correct
+                            setTimeout(() => scrambleText(element, text), nextAnimationDelay);
+                        }
+                        iterations += 1 / 3; 
+                    }, animationSpeed);
+                }
+                scrambleText(titleElement, originalText); // Start the title animation
+            } else {
+                console.error("Title element #animated-title not found");
+            }
+
+            // --- 3D Particle Background ---
+            // Check if THREE.js is loaded
+            if (typeof THREE === 'undefined') {
+                console.error("THREE.js library not loaded.");
+                return;
+            }
+
+            const canvas = document.getElementById('bg-canvas');
+            if (!canvas) {
+                console.error("Canvas element #bg-canvas not found");
+                return;
+            }
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: false }); // alpha: false for performance
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 1); // Set background to solid black
+
+            // Create particles
+            const particleGeometry = new THREE.BufferGeometry();
+            const particleCount = 5000;
+            const positions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount * 3; i++) {
+                positions[i] = (Math.random() - 0.5) * 10; // Distribute in a 10x10x10 cube
+            }
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            // Particle material (using Manochitra green)
+            const particleMaterial = new THREE.PointsMaterial({
+                color: 0x0eDB33, // This is rgb(14, 219, 51)
+                size: 0.02,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            const particles = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particles);
+
+            camera.position.z = 5;
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate the particle system
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.0008;
+                
+                renderer.render(scene, camera);
+            }
+            
+            // Handle window resize
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            
+            window.addEventListener('resize', onWindowResize, false);
+            
+            animate(); // Start the animation
+        });
+
     </script>
 
 </body>
 </html>
+
