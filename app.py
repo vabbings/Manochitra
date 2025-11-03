@@ -1,15 +1,22 @@
-from flask import Flask, send_from_directory
+from flask import Flask, request, jsonify, render_template, session, redirect, send_from_directory, make_response
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-in-production'  # Change this in production!
 
-# Serve the login page from the project root (where login.html lives)
 @app.route("/")
 def login_page():
-    return send_from_directory(".", "login.html")
+    """Login page route"""
+    return render_template("login.html")
 
-# Serve other files in the project root (e.g., auth.js, css, images)
-@app.route('/<path:filename>')
-def serve_file(filename):
-    return send_from_directory(".", filename)
+@app.route("/signup")
+def signup_page():
+    """Sign up page route"""
+    return render_template("signup.html")
 
-app.run(host='0.0.0.0', port=5173, debug=True)
+@app.route("/frontpage")
+def frontpage():
+    """Frontpage route - protected by Firebase on client side"""
+    return render_template("frontpage.html")
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5173, debug=True)

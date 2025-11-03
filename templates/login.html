@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Manochitra</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        /* Apply Inter font as the default */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <script>
+        // Optional: Custom Tailwind configuration
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-xl m-4">
+        
+        <!-- Header Section -->
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-indigo-600">Manochitra</h1>
+            <p class="mt-2 text-gray-500">AI Powered Mind Maps for Aspirants</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+            
+            <h2 class="text-2xl font-semibold text-gray-900 text-center">Welcome Back!</h2>
+            
+            <!-- Email Input -->
+            <div>
+                <label for="email" class="text-sm font-medium text-gray-700 sr-only">Email address</label>
+                <input id="email" name="email" type="email" autocomplete="email" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                       placeholder="Email address">
+            </div>
+
+            <!-- Password Input -->
+            <div>
+                <label for="password" class="text-sm font-medium text-gray-700 sr-only">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                       placeholder="Password">
+            </div>
+
+            <!-- Forgot Password Link -->
+            <div class="flex items-center justify-end">
+                <div class="text-sm">
+                    <a id="forgotPasswordLink" href="#" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                        Forgot your password?
+                    </a>
+                </div>
+            </div>
+
+            <!-- Message Area -->
+            <div id="messageArea" class="text-sm text-center font-medium hidden"></div>
+
+            <!-- Login Button -->
+            <div>
+                <button type="submit"
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                    Sign In
+                </button>
+            </div>
+
+            <!-- Separator -->
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">
+                        Or continue with
+                    </span>
+                </div>
+            </div>
+
+            <!-- Google Sign-In Button -->
+            <div>
+                <button type="button" id="googleSignIn"
+                        class="w-full flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                    <!-- Google SVG Icon -->
+                    <svg class="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                        <path fill="#4285F4" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+                        <path fill="#34A853" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8V44c5.842,0,11.234-1.834,15.541-5.186l-5.657-5.657C34.046,36.053,29.268,38,24,38c-3.187,0-6.057-1.07-8.406-2.846l-5.657,5.657C14.07,43.43,18.817,44,24,44c5.183,0,9.915-1.35,13.88-3.917C41.7,36.708,44,30.838,44,24C44,22.659,43.862,21.35,43.611,20.083z"></Spath>
+                        <path fill="#FBBC05" d="M15.594,29.154l5.657-5.657C20.06,21.94,19.2,19.2,19.2,16c0-3.2,0.86-6.06,2.301-8.406l-5.657-5.657C12.56,6.053,10.183,10.662,10.183,16c0,5.338,2.377,9.947,6.057,13.154H15.594z"></path>
+                        <path fill="#EA4335" d="M10.183,16c0-5.338,2.377-9.947,6.057-13.154l5.657,5.657C20.06,10.06,19.2,12.8,19.2,16c0,3.2,0.86,6.06,2.301,8.406l-5.657,5.657C12.56,25.947,10.183,21.338,10.183,16z"></path>
+                    </svg>
+                    Sign in with Google
+                </button>
+            </div>
+        </form>
+        
+        <!-- Sign Up Link -->
+        <p class="mt-8 text-center text-sm text-gray-600">
+            Don't have an account?
+            <a id="signUpLink" href="#" class="font-medium text-indigo-600 hover:text-indigo-500 hover:underline">
+                Sign Up
+            </a>
+        </p>
+
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script src="{{ url_for('static', filename='firebase-config.js') }}"></script>
+
+    <script>
+        // Get form and message elements
+        const loginForm = document.getElementById('loginForm');
+        const messageArea = document.getElementById('messageArea');
+        
+        // Check if user is already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in, redirect to frontpage
+                window.location.href = '/frontpage';
+            }
+        });
+
+        // Helper function to show messages
+        function showMessage(message, type = 'info') {
+            messageArea.textContent = message;
+            messageArea.classList.remove('hidden', 'text-gray-600', 'text-red-600', 'text-green-600', 'text-indigo-600');
+            if (type === 'error') {
+                messageArea.classList.add('text-red-600');
+            } else if (type === 'success') {
+                messageArea.classList.add('text-green-600');
+            } else {
+                messageArea.classList.add('text-gray-600');
+            }
+        }
+
+        // Email/Password Login
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            showMessage('Signing in...', 'info');
+            
+            try {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                showMessage('Success! Redirecting...', 'success');
+                // Redirect will happen automatically via onAuthStateChanged
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Failed to sign in. Please try again.';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'Incorrect password. Please try again.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Invalid email address.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = 'This account has been disabled.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'Too many failed attempts. Please try again later.';
+                        break;
+                }
+                
+                showMessage(errorMessage, 'error');
+            }
+        });
+
+        // Google Sign-In
+        document.getElementById('googleSignIn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            showMessage('Redirecting to Google Sign-In...', 'info');
+            
+            try {
+                const result = await auth.signInWithPopup(googleProvider);
+                showMessage('Success! Redirecting...', 'success');
+                // Redirect will happen automatically via onAuthStateChanged
+            } catch (error) {
+                console.error('Google Sign-In error:', error);
+                let errorMessage = 'Failed to sign in with Google.';
+                
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Sign-in cancelled.';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Popup blocked. Please allow popups for this site.';
+                }
+                
+                showMessage(errorMessage, 'error');
+            }
+        });
+
+        // Forgot Password
+        document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            
+            if (!email) {
+                showMessage('Please enter your email address first.', 'error');
+                return;
+            }
+            
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showMessage('Password reset email sent! Check your inbox.', 'success');
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showMessage('Failed to send reset email. Please check your email address.', 'error');
+            }
+        });
+
+        // Sign Up Link
+        document.getElementById('signUpLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/signup';
+        });
+
+    </script>
+
+</body>
+</html>
