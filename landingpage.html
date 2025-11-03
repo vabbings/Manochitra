@@ -36,7 +36,7 @@
                  |-- bgimg.jpg   (your image)
             */
             background-color: #000000;
-            background-image: url('bgimg.png');
+            background-image: url('bgimg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed; /* Keeps the background still on scroll */
@@ -62,7 +62,10 @@
             color: #ffffff;
             
             /* The grayish glow effect */
-            
+            text-shadow: 
+                0 0 10px #AAAAAA,
+                0 0 20px #999999,
+                0 0 35px #888888;
            margin-bottom: 15px; /* Reduced space to bring subtitle closer */
        }
 
@@ -221,8 +224,8 @@
    <div class="hero-section">
         <h1 class="title">ManoChitra</h1>
        <p class="subtitle">AI Powered Visual Knowledge Mapper</p>
-        <!-- Changed from <button> to <a> and added href="#" -->
-        <a href=login.html class="styled-button" id="getStartedButton">Get Started</a>
+        <!-- Changed from <button> to <a> and added href="login.html" -->
+        <a href="login.html" class="styled-button" id="getStartedButton">Get Started</a>
    </div>
 
    <!-- New Features Section (below the hero) -->
@@ -257,13 +260,17 @@
 
         // Show the message box when "Get Started" is clicked
         getStartedButton.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevents the link from navigating
+            event.preventDefault(); // Prevents the link from navigating immediately
             messageBox.classList.remove('hidden');
         });
 
-        // Hide the message box when "Close" is clicked
+        // Hide the message box when "Close" is clicked, then navigate
         closeButton.addEventListener('click', () => {
             messageBox.classList.add('hidden');
+            // *** FIX ***
+            // This line navigates to the href from the "Get Started" 
+            // button *after* you close the popup.
+            window.location.href = getStartedButton.href;
         });
 
        // --- Scroll Animation Logic ---
