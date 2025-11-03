@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ManoChitra - Get Started</title>
+    
+    <!-- Import the "Press Start 2P" font, which looks like a Minecraft/pixel font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Basic reset and page setup */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            /* 'Press Start 2P' is the pixel font. It requires internet.
+              'Courier New' is a fallback font that works offline and looks blocky.
+            */
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            color: #ffffff;
+            /* This sets the background.
+              1. A solid black color as a fallback.
+              2. The grid image.
+
+              *** LOCAL FILE INSTRUCTION ***
+              I've set this back to 'bgimg.jpg'.
+              For this to work, you MUST save your 'bgimg.jpg' file
+              in the EXACT SAME FOLDER as this 'index.html' file.
+
+              Folder Structure:
+              /Your-Project-Folder
+                 |-- index.html  (this file)
+                 |-- bgimg.jpg   (your image)
+            */
+            background-color: #000000;
+            background-image: url('bgimg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Keeps the background still on scroll */
+            overflow-x: hidden; /* Prevents horizontal scrollbar from animations */
+        }
+
+       /* New Hero Section */
+       .hero-section {
+           display: flex;
+           flex-direction: column;
+           justify-content: center;
+           align-items: center;
+           height: 100vh; /* Takes up the full initial screen */
+           text-align: center;
+           padding: 20px;
+           box-sizing: border-box;
+       }
+
+        /* Styling for the main title */
+        .title {
+            /* Responsive font size: min 2rem, scales with 10% of viewport width, max 4rem */
+            font-size: clamp(2rem, 10vw, 4rem);
+            color: #ffffff;
+            
+            /* The grayish glow effect */
+            
+           margin-bottom: 15px; /* Reduced space to bring subtitle closer */
+       }
+
+       /* New subtitle style */
+       .subtitle {
+           font-size: 1rem;
+           color: #ccc; /* Slightly dimmer than the main title */
+           text-shadow: 0 0 5px #999; /* A much softer glow */
+           margin-top: 0;
+           margin-bottom: 40px; /* Space between subtitle and button */
+           padding: 0 10px; /* Add padding in case it gets too wide */
+           line-height: 1.5; /* Add line height for potential wrapping */
+        }
+
+        /* Styling for the button (now an <a> tag) */
+        .styled-button {
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            font-size: 1rem;
+            color: #ffffff;
+            background-color: #555555; /* The requested gray color */
+            border: 2px solid #888888; /* A slightly lighter gray border */
+            padding: 16px 32px;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 8px; /* Rounded corners */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            display: inline-block; /* Added for proper <a> tag styling */
+        }
+
+        /* Hover effect for the button */
+        .styled-button:hover {
+            background-color: #777777; /* Lighter gray on hover */
+            border-color: #AAAAAA;
+            box-shadow: 0 0 20px #AAAAAA; /* Add a gray glow on hover */
+            transform: translateY(-2px); /* Slight lift */
+        }
+
+       /* New section wrapper for the features */
+       .features-section {
+           padding: 60px 0; /* Space above and below the card grid */
+           width: 100%;
+       }
+
+        /* New styles for the feature cards grid */
+        .features-grid {
+            display: flex;
+           flex-wrap: nowrap; /* Forces cards into a single line */
+           overflow-x: auto;  /* Makes the line scrollable horizontally */
+           overflow-y: hidden; /* Hides vertical scrollbar for the grid */
+           gap: 20px; /* Space between cards */
+            width: 100%;
+           max-width: 1100px; /* Max width of the grid component */
+           margin: 0 auto; /* Centers the grid */
+           padding: 20px; /* Padding for the scroll area */
+            box-sizing: border-box;
+           -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+        }
+
+        .feature-card {
+            background-color: rgba(30, 30, 30, 0.7); /* Semi-transparent dark background */
+            border: 2px solid #555;
+            border-radius: 8px;
+           padding: 24px; /* Increased padding */
+           flex-basis: 320px; /* Larger base width */
+           flex-shrink: 0; /* Prevents cards from shrinking */
+           max-width: 320px; /* Larger max width */
+            box-sizing: border-box;
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            text-align: left; /* Aligns text to the left inside the card */
+
+           /* Animation: Start hidden */
+           opacity: 0;
+           transform: translateY(40px);
+           transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+       }
+
+       /* Animation: Class to add when visible */
+       .feature-card.is-visible {
+           opacity: 1;
+           transform: translateY(0);
+        }
+         
+        .feature-card:hover {
+            transform: translateY(-5px); /* Lift effect on hover */
+            border-color: #888;
+            box-shadow: 0 0 20px rgba(170, 170, 170, 0.3);
+        }
+
+        .feature-card h3 {
+           font-size: 1.1rem; /* Larger font for card title */
+            color: #eee;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #AAAAAA; /* Lighter glow */
+        }
+
+        .feature-card p {
+           font-size: 0.85rem; /* Larger font for card text */
+            color: #ccc;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+
+        /* Custom message box (replaces alert()).
+          It starts as hidden.
+        */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            border: 2px solid #888;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            text-align: center;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .message-box.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .message-box p {
+            margin: 0 0 20px 0;
+            font-size: 0.9rem;
+            line-height: 1.5; /* Improves readability for pixel fonts */
+        }
+        
+        .message-box-close {
+            /* This reuses the button style but makes it smaller */
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #fff;
+            background-color: #555;
+            border: 1px solid #777;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .message-box-close:hover {
+            background-color: #777;
+        }
+
+    </style>
+</head>
+<body>
+
+   <!-- The main hero container (full screen) -->
+   <div class="hero-section">
+        <h1 class="title">ManoChitra</h1>
+       <p class="subtitle">AI Powered Visual Knowledge Mapper</p>
+        <!-- Changed from <button> to <a> and added href="#" -->
+        <a href=login.html class="styled-button" id="getStartedButton">Get Started</a>
+   </div>
+
+   <!-- New Features Section (below the hero) -->
+   <div class="features-section">
+       <div class="features-grid">
+            <div class="feature-card">
+                <h3>Daily Reading Quizzes</h3>
+                <p>Test your knowledge with smart quizzes based on the news and articles you read today.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Visual Data Graphs</h3>
+                <p>Understand complex information instantly with visual graph representations of news and data.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Export to PDF</h3>
+                <p>Save and share important articles, graphs, and quiz results by exporting them directly to PDF.</p>
+            </div>
+        </div>
+    </div>
+ 
+    <!-- The hidden message box -->
+    <div id="messageBox" class="message-box hidden">
+        <p>Thanks for getting started!</p>
+        <button id="closeButton" class="message-box-close">Close</button>
+    </div>
+
+    <script>
+        // Get references to the HTML elements
+        const getStartedButton = document.getElementById('getStartedButton');
+        const messageBox = document.getElementById('messageBox');
+        const closeButton = document.getElementById('closeButton');
+
+        // Show the message box when "Get Started" is clicked
+        getStartedButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevents the link from navigating
+            messageBox.classList.remove('hidden');
+        });
+
+        // Hide the message box when "Close" is clicked
+        closeButton.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+       // --- Scroll Animation Logic ---
+       
+       // Select all the cards
+       const cards = document.querySelectorAll('.feature-card');
+
+       // Set up the Intersection Observer
+       const observer = new IntersectionObserver((entries) => {
+           entries.forEach(entry => {
+               // If the card is on screen
+               if (entry.isIntersecting) {
+                   // Add the 'is-visible' class to trigger the animation
+                   entry.target.classList.add('is-visible');
+                   // Stop observing this card once it's visible
+                   observer.unobserve(entry.target);
+               }
+           });
+       }, {
+           threshold: 0.1 // Trigger when 10% of the card is visible
+       });
+
+       // Tell the observer to watch each card
+       cards.forEach(card => {
+           observer.observe(card);
+       });
+    </script>
+
+</body>
+</html>
+
