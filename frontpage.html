@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-RTL">
+    <meta charset="UTF-8"> <!-- Corrected from UTF-RTL -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ManoChitra</title>
     <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
@@ -10,7 +10,10 @@
         
         body {
             font-family: 'Inter', sans-serif;
+            /* Reverted back from transparent */
         }
+
+        /* Removed #canvas-bg style */
 
         /* Custom scrollbar for history */
         #history-list::-webkit-scrollbar {
@@ -27,7 +30,10 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 overflow-hidden h-screen">
+<!-- Added bg-gray-900 back, as the #canvas-bg is removed --><body class="bg-gray-900 overflow-hidden h-screen">
+
+    <!-- Removed 3D Background Container -->
+    <!-- <div id="canvas-bg"></div> -->
 
     <div class="flex h-screen">
         <!-- History Sidebar (Initially hidden on small screens, slides out) --><aside id="history-sidebar" class="fixed top-0 left-0 z-40 w-72 h-screen bg-gray-800 text-white flex flex-col transition-transform duration-300 ease-in-out -translate-x-full">
@@ -45,8 +51,7 @@
         </aside>
 
         <!-- Main Content Area --><main id="main-content" class="flex-1 flex flex-col h-screen transition-all duration-300 ease-in-out">
-            <!-- Top Header --><header class="flex-shrink-0 w-full flex items-center justify-between p-4 bg-gray-900">
-                <button id="menu-toggle" class="p-2 rounded-full hover:bg-gray-700">
+            <!-- Top Header --><header class="flex-shrink-0 w-full flex items-center justify-between p-4 bg-gray-900"> <!-- Changed bg-transparent back to bg-gray-900 --><button id="menu-toggle" class="p-2 rounded-full hover:bg-gray-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -80,27 +85,9 @@
                         </button>
                     </div>
 
-                    <!-- Suggestions Container --><div id="suggestions-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button class="suggestion-chip group">
-                            <h3 class="font-semibold text-gray-200">Explain Photosynthesis</h3>
-                            <p class="text-sm text-gray-400">like I'm a 5th grader</p>
-                        </button>
-                        <button class="suggestion-chip group">
-                            <h3 class="font-semibold text-gray-200">Plan a trip to Japan</h3>
-                            <p class="text-sm text-gray-400">focused on food and culture</p>
-                        </button>
-                        <button class="suggestion-chip group">
-                            <h3 class="font-semibold text-gray-200">Debug Python Code</h3>
-                            <p class="text-sm text-gray-400">for a list index out of bounds error</p>
-                        </button>
-                        <button class="suggestion-chip group">
-                            <h3 class="font-semibold text-gray-200">Write a story</h3>
-                            <p class="text-sm text-gray-400">about a cat who gains superpowers</p>
-                        </button>
-                    </div>
+                    <!-- Suggestions Container (REMOVED) -->
                     
-                    <!-- Results Container --><div id="results-container" class="mt-8 space-y-6 hidden">
-                        <!-- AI Generated Cards will appear here --></div>
+                    <!-- Results Container (REMOVED) -->
 
                     <!-- Message Box --><div id="message-box" class="hidden p-3 rounded-lg text-sm mt-8"></div>
 
@@ -111,117 +98,11 @@
     </div>
 
     <!-- Add custom styles for new elements --><style>
-        .suggestion-chip {
-            display: block;
-            width: 100%;
-            background-color: #1f2937; /* gray-800 */
-            padding: 1rem;
-            border-radius: 0.75rem; /* 12px */
-            border: 1px solid #374151; /* gray-700 */
-            text-align: left;
-            transition: all 0.2s;
-        }
-        .suggestion-chip:hover {
-            background-color: #374151; /* gray-700 */
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        /* Styles for new interactive cards */
-        .ai-card {
-            background-color: #1f2937; /* gray-800 */
-            border-radius: 0.5rem; /* 8px */
-            border: 1px solid #374151; /* gray-700 */
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease-in-out;
-            overflow: hidden;
-        }
-
-        .ai-card .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem; /* p-6 */
-            cursor: pointer;
-        }
-        
-        .ai-card .card-header h3 {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600; /* font-semibold */
-            color: rgb(14, 219, 51); /* green color */
-        }
-
-        .ai-card .card-header .toggle-icon {
-            transition: transform 0.3s;
-            flex-shrink: 0;
-            margin-left: 1rem;
-        }
-        .ai-card.is-open .card-header .toggle-icon {
-            transform: rotate(90deg);
-        }
-
-        .ai-card .card-body {
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out, opacity 0.3s ease-in;
-            padding: 0 1.5rem; /* px-6 */
-        }
-        .ai-card.is-open .card-body {
-            max-height: 1000px; /* Arbitrary large number */
-            opacity: 1;
-            padding-bottom: 1.5rem; /* pb-6 */
-            transition: max-height 0.5s ease-in, opacity 0.5s 0.1s ease-in;
-        }
-        .ai-card .children-container {
-            margin-top: 1rem;
-            padding-left: 1rem;
-            border-left: 2px solid #374151; /* gray-700 */
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem; /* space-y-3 */
-        }
-        /* Nested cards are smaller */
-        .ai-card .children-container .ai-card {
-            background-color: #374151; /* gray-700 */
-        }
-        .ai-card .children-container .ai-card .card-header {
-            padding: 1rem; /* p-4 */
-        }
-         .ai-card .children-container .ai-card .card-header h3 {
-            font-size: 1.125rem; /* text-lg */
-            color: rgb(14, 219, 51); /* green color */
-        }
-        .ai-card .children-container .ai-card .card-body {
-            padding: 0 1rem; /* px-4 */
-        }
-         .ai-card .children-container .ai-card.is-open .card-body {
-            padding-bottom: 1rem; /* pb-4 */
-         }
-
-        .find-related-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: rgb(14, 219, 51); /* green color */
-            background-color: #1e3a8a; /* blue-900 - kept this color as it's not "blue text" */
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            margin-top: 1rem;
-            transition: all 0.2s;
-        }
-        .find-related-btn:hover {
-            background-color: #1e40af; /* blue-800 */
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
+        /* All card and suggestion styles have been removed */
     </style>
 
     <script type="module">
-        // --- Gemini API Configuration ---
-        const API_KEY = ""; // Leave this as-is
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        // --- Gemini API Configuration (REMOVED) ---
         
         // --- Get Elements ---
         const menuToggle = document.getElementById('menu-toggle');
@@ -230,33 +111,12 @@
         const historyList = document.getElementById('history-list');
         const searchPrompt = document.getElementById('search-prompt');
         const searchBtn = document.getElementById('search-btn');
-        const suggestionsContainer = document.getElementById('suggestions-container');
-        const resultsContainer = document.getElementById('results-container');
         const messageBox = document.getElementById('message-box');
         
         // --- State ---
         let history = [];
 
-        // --- Schemas for AI ---
-        const cardGenerationSchema = {
-            type: "OBJECT",
-            properties: {
-                main_topic: { type: "STRING", description: "The single, central main topic from the user's prompt." },
-                related_cards: {
-                    type: "ARRAY",
-                    description: "A list of 3-5 cards. Each card should have a title and a concise, one-paragraph description related to the main topic.",
-                    items: {
-                        type: "OBJECT",
-                        properties: {
-                            title: { type: "STRING", description: "The sub-topic title for this card." },
-                            description: { type: "STRING", description: "A one-paragraph (2-3 sentences) explanation of this sub-topic." }
-                        },
-                        propertyOrdering: ["title", "description"]
-                    }
-                }
-            },
-            propertyOrdering: ["main_topic", "related_cards"]
-        };
+        // --- Schemas for AI (REMOVED) ---
 
         // --- Event Listeners ---
         menuToggle.addEventListener('click', toggleSidebar);
@@ -266,16 +126,6 @@
             if (e.key === 'Enter') {
                 handleSearch();
             }
-        });
-
-        // Add listeners to initial suggestion chips
-        document.querySelectorAll('.suggestion-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const title = chip.querySelector('h3').innerText;
-                const subtext = chip.querySelector('p').innerText;
-                searchPrompt.value = `${title} ${subtext}`;
-                handleSearch();
-            });
         });
 
         // --- Core Functions ---
@@ -290,205 +140,17 @@
                 showMessage('Please enter a topic to search.', 'warning');
                 return;
             }
-// ... existing code ... -->
-            suggestionsContainer.classList.add('hidden'); // Hide suggestions
-            resultsContainer.classList.remove('hidden');
-            // Reset class for loading
-            resultsContainer.className = "mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start"; 
-            resultsContainer.innerHTML = `
-                <div class="flex justify-center items-center p-16 col-span-full">
-                    <svg class="animate-spin h-10 w-10 text-[rgb(14,219,51)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </div>`;
             
             // Add to history
             addHistoryItem(userPrompt);
 
-            // --- Call AI ---
-            const systemPrompt = `You are a helpful assistant for students using "ManoChitra". Given a topic, generate a set of informational cards.
-User Topic: "${userPrompt}"`;
-
-            const payload = {
-                contents: [{ parts: [{ text: systemPrompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: cardGenerationSchema
-                }
-            };
-            
-            const data = await fetchWithBackoff(payload);
-            
-            if (data && data.main_topic && data.related_cards) {
-                renderResults(data);
-            } else {
-                renderError('Failed to generate cards. The AI returned an unexpected response.');
-            }
+            // --- Call AI (REMOVED) ---
+            // All logic for fetching, loading, and rendering cards has been removed.
+            // You can add new functionality here, like a simple text response.
+            showMessage('Search functionality is being updated.', 'info');
         }
 
-        function renderResults(data) {
-            resultsContainer.innerHTML = ''; // Clear loading spinner
-            // MODIFIED: Change container to a grid for the root cards, ADD items-start
-            resultsContainer.className = "mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in items-start";
-
-            // Add a title for the results
-            const titleEl = document.createElement('h2');
-            // MODIFIED: Make title span the full grid width
-            titleEl.className = "text-2xl font-bold text-gray-100 mb-0 col-span-full";
-            titleEl.innerText = data.main_topic;
-            resultsContainer.appendChild(titleEl);
-
-            // Render each card
-            data.related_cards.forEach(card => {
-                const cardEl = createCardElement(card, true); // true = isRoot
-                resultsContainer.appendChild(cardEl);
-            });
-        }
-        
-        /**
-         * NEW: Creates a card element with event listeners
-         * @param {object} card - The card data { title, description }
-         * @param {boolean} isRoot - Is this a top-level card?
-         * @returns {HTMLElement} The card element
-         */
-        function createCardElement(card, isRoot = false) {
-            const cardEl = document.createElement('div');
-            cardEl.className = isRoot ? 'ai-card is-root' : 'ai-card';
-
-            // Card Header (Clickable)
-            const cardHeader = document.createElement('div');
-            cardHeader.className = 'card-header';
-            cardHeader.innerHTML = `
-                <h3>${card.title}</h3>
-                <svg class="toggle-icon w-6 h-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-            `;
-            
-            // Card Body (Hidden)
-            const cardBody = document.createElement('div');
-            cardBody.className = 'card-body';
-            
-            const description = document.createElement('p');
-            description.className = 'text-gray-300';
-            description.innerText = card.description;
-            
-            const findRelatedBtn = document.createElement('button');
-            findRelatedBtn.className = 'find-related-btn';
-            findRelatedBtn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l1 10M3 10l1 10m5-1l4-16M3 10l1 10M9 20l4-16M3 10l1 10m5-1l4-16" />
-                </svg>
-                Find Related
-            `;
-            
-            const childrenContainer = document.createElement('div');
-            childrenContainer.className = 'children-container';
-            childrenContainer.style.display = 'none'; // Hide until populated
-            
-            cardBody.appendChild(description);
-            cardBody.appendChild(findRelatedBtn);
-            cardBody.appendChild(childrenContainer);
-            
-            cardEl.appendChild(cardHeader);
-            cardEl.appendChild(cardBody);
-
-            // --- Add Event Listeners ---
-
-            // Click ANYWHERE on the card to "unfold"
-            cardEl.addEventListener('click', (e) => {
-                
-                // If the click was on the "Find Related" button, do nothing.
-                // That button has its own listener with e.stopPropagation().
-                if (e.target.closest('.find-related-btn')) {
-                    return;
-                }
-                
-                // Stop this click event from bubbling up to parent cards.
-                e.stopPropagation();
-                
-                // At this point, the click was on this card's header or body, not a button.
-
-                const currentlyOpen = cardEl.classList.contains('is-open');
-
-                // Find the direct parent container of this card
-                const parentContainer = cardEl.parentElement;
-                
-                // Close all sibling cards (cards at the same level)
-                if (parentContainer) {
-                    const siblings = parentContainer.querySelectorAll(':scope > .ai-card');
-                    siblings.forEach(sibling => {
-                        if (sibling !== cardEl) { // Don't close myself
-                            sibling.classList.remove('is-open');
-                        }
-                    });
-                }
-                
-                // Toggle the clicked card
-                cardEl.classList.toggle('is-open');
-            });
-
-            // Click "Find Related" to expand
-            findRelatedBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent card from toggling
-                if (findRelatedBtn.disabled) return; // Prevent multiple clicks
-
-                findRelatedBtn.innerText = 'Loading...';
-                findRelatedBtn.disabled = true;
-                
-                // Add a small loading spinner
-                const spinner = document.createElement('svg');
-                spinner.className = "animate-spin -ml-1 mr-2 h-5 w-5 text-[rgb(14,219,51)] inline-block";
-                spinner.innerHTML = `<svg class="animate-spin h-5 w-5 text-[rgb(14,219,51)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>`;
-                findRelatedBtn.prepend(spinner);
-                findRelatedBtn.innerText = 'Loading...';
-                
-                findRelatedContent(card.title, childrenContainer, findRelatedBtn);
-            });
-
-            return cardEl;
-        }
-
-        /**
-         * NEW: Fetches and renders related sub-cards
-         * @param {string} topic - The topic to expand on
-         * @param {HTMLElement} container - The container to append children to
-         * @param {HTMLButtonElement} button - The button that was clicked
-         */
-        async function findRelatedContent(topic, container, button) {
-            const systemPrompt = `You are a helpful assistant. The user wants to expand on the topic: "${topic}". Generate 3-5 related sub-topics.`;
-            const payload = {
-                contents: [{ parts: [{ text: systemPrompt }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: cardGenerationSchema
-                }
-            };
-            
-            const data = await fetchWithBackoff(payload);
-            
-            if (data && data.related_cards && data.related_cards.length > 0) {
-                container.style.display = 'flex'; // Show children container
-                data.related_cards.forEach(card => {
-                    const cardEl = createCardElement(card, false); // Not a root card
-                    container.appendChild(cardEl);
-                });
-                button.style.display = 'none'; // Hide button after expansion
-            } else {
-                button.innerText = 'No related topics found.';
-                button.disabled = true;
-            }
-        }
-
-        function renderError(message) {
-            // MODIFIED: Reset class for error message
-            resultsContainer.className = "mt-8 space-y-6";
-            resultsContainer.innerHTML = `<p class="text-red-300 p-4 bg-red-900 border border-red-500 rounded-lg">${message}</p>`;
-        }
+        // --- Card Rendering Functions (REMOVED) ---
         
         // --- History Functions ---
         
@@ -533,51 +195,7 @@ User Topic: "${userPrompt}"`;
             });
         }
         
-        // --- API Fetch ---
-        async function fetchWithBackoff(payload, maxRetries = 5) {
-            // (Keeping this function exactly as it was in the previous file)
-            let attempt = 0;
-            let delay = 1000;
-            while (attempt < maxRetries) {
-                try {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        if (response.status === 429 || response.status >= 500) {
-                            throw new Error(`API Error: ${response.status}`);
-                        } else {
-                            const errorResult = await response.json();
-                            console.error('API client error:', errorResult);
-                            showMessage(`Error: ${errorResult.error?.message || 'Failed to get data.'}`, 'error');
-                            return null;
-                        }
-                    }
-
-                    const result = await response.json();
-                    const candidate = result.candidates?.[0];
-
-                    if (candidate && candidate.content?.parts?.[0]?.text) {
-                        return JSON.parse(candidate.content.parts[0].text);
-                    } else {
-                        console.error('Invalid response structure:', result);
-                        showMessage('AI returned an unexpected response.', 'error');
-                        return null;
-                    }
-
-                } catch (error) {
-                    console.warn(`Attempt ${attempt + 1} failed. Retrying in ${delay}ms...`, error);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
-                    attempt++;
-                }
-            }
-            showMessage('Failed to generate map after multiple attempts. Please try again.', 'error');
-            return null;
-        }
+        // --- API Fetch (REMOVED) ---
 
         // --- UI Utility ---
         function showMessage(text, type = 'info') {
@@ -609,38 +227,9 @@ User Topic: "${userPrompt}"`;
             }, 3000);
         }
 
-        /**
-         * NEW: Shows a demo on page load
-         */
-        function showDemo() {
-            const demoData = {
-                main_topic: "Demo: Click a Card to See It Unfold",
-                related_cards: [
-                    {
-                        title: "What is Photosynthesis?",
-                        description: "Photosynthesis is the process used by plants, algae, and some bacteria to convert light energy into chemical energy, through a process that converts water and carbon dioxide into sugars (food) and oxygen."
-                    },
-                    {
-                        title: "The Two Stages of Photosynthesis",
-                        description: "The two stages are: 1) The light-dependent reactions, which capture light energy to make ATP and NADPH, and 2) The light-independent reactions (Calvin Cycle), which use that energy to make sugars from CO2."
-                    },
-                    {
-                        title: "Why is Photosynthesis Important?",
-                        description: "It is the primary source of all food on Earth and it produces the oxygen we breathe. It forms the foundation of nearly all ecosystems and regulates atmospheric carbon dioxide levels."
-                    }
-                ]
-            };
-
-            // Hide suggestions, show results
-            suggestionsContainer.classList.add('hidden');
-            resultsContainer.classList.remove('hidden');
-            
-            // Render the demo cards
-            renderResults(demoData);
-        }
+        // --- Demo Function (REMOVED) ---
         
-        // --- Run Demo on Page Load ---
-        document.addEventListener('DOMContentLoaded', showDemo);
+        // --- Run Demo on Page Load (REMOVED) ---
 
     </script>
     
@@ -651,12 +240,12 @@ User Topic: "${userPrompt}"`;
             text-align: left;
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
-            font-medium;
+            font-weight: 500; /* medium */
             color: #d1d5db; /* gray-300 */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s;  
         }
         .history-item-btn:hover {
             background-color: #374151; /* gray-700 */
@@ -672,9 +261,9 @@ User Topic: "${userPrompt}"`;
         }
     </style>
 
+
+    <!-- +++ REMOVED THREE.JS BACKGROUND SCRIPT +++ -->
+
 </body>
 </html>
-
-
-
 
