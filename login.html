@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Manochitra</title>
     <!-- Load Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
-    <!-- ADDED: Load three.js for 3D animation --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- REMOVED: three.js script -->
     <!-- Load Inter font from Google Fonts --><link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
         /* Apply Inter font as the default */
         body {
             font-family: 'Inter', sans-serif;
-            overflow: hidden; /* ADDED: Prevent scrolling */
+            /* REMOVED: overflow: hidden; */
         }
         /* Custom style for the Minecraft-style title */
         .minecraft-font {
@@ -25,24 +25,28 @@
         .manochitra-color {
             color: rgb(14, 219, 51);
         }
-        /* UPDATED: Removed background image, set to solid black */
-        .grid-background {
-            /* background-image: url(...); REMOVED */
-            min-height: 100vh; /* Ensure it covers the full viewport height */
+        /* UPDATED: Renamed .grid-background to .dither-container and merged styles */
+        .dither-container {
+            width: 100%;
+            min-height: 100vh; /* Ensures it covers the full viewport height */
+            position: relative; /* Added from your CSS snippet */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background-color: #000; /* Solid black background */
+
+            /* REMOVED: Dot grid background styles */
         }
-        /* ADDED: Style for the 3D canvas */
-        #bg-canvas {
+        
+        /* ADDED: Style for the new dot grid canvas */
+        #dot-grid-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1; /* Place it behind the content */
+            z-index: -1; /* Place it behind the login form */
         }
     </style>
     <script>
@@ -58,12 +62,12 @@
         }
     </script>
 </head>
-<body class="grid-background">
+<body class="dither-container">
 
-    <!-- ADDED: Canvas for the 3D background animation -->
-    <canvas id="bg-canvas"></canvas>
+    <!-- ADDED: Canvas for the interactive dot grid -->
+    <canvas id="dot-grid-canvas"></canvas>
 
-    <!-- Main content container - ADDED: z-index to ensure it's on top -->
+    <!-- Main content container - UPDATED: z-index to ensure it's on top of canvas */ -->
     <div class="w-full max-w-sm p-8 space-y-8 m-4" style="z-index: 1;">
         
         <!-- Header Section -->
@@ -79,8 +83,8 @@
             <div class="relative">
                 <label for="email" class="block text-sm font-bold text-gray-200 mb-1">Email address</label>
                 <input id="email" name="email" type="email" autocomplete="email" required
-                        class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                        placeholder="Email address">
+                       class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                       placeholder="Email address">
                 <button type="button" id="emailClearBtn" class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none text-gray-400 hover:text-gray-200 hidden" style="top: 1.75rem;">
                     <!-- Clear Icon (X) -->
                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,8 +97,8 @@
             <div class="relative">
                 <label for="password" class="block text-sm font-bold text-gray-200 mb-1">Password</label>
                 <input id="password" name="password" type="password" autocomplete="current-password" required
-                        class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
-                        placeholder="Password">
+                       class="w-full pr-10 px-4 py-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-colors"
+                       placeholder="Password">
                 <button type="button" id="passwordToggle" class="absolute inset-y-0 right-0 flex items-center pr-3 focus:outline-none text-gray-400 hover:text-gray-200" style="top: 1.75rem;">
                     <!-- Eye Icon (Open) -->
                     <svg id="eyeOpen" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -159,7 +163,7 @@
         <!-- Sign Up Link -->
         <p class="mt-8 text-center text-sm text-gray-200">
             Don't have an account?
-            <a id="signUpLink" href="manochitra_signup.html" class="font-medium text-gray-400 hover:text-gray-300 hover:underline">
+            <a id="signUpLink" href="signup.html" class="font-medium text-gray-400 hover:text-gray-300 hover:underline">
                 Sign Up
             </a>
         </p>
@@ -247,7 +251,7 @@
             alert('Navigating to the Sign Up page (manochitra_signup.html).');
         });
 
-        // --- 3D Particle & Text Scramble ---
+        // --- Text Scramble ---
         window.addEventListener('DOMContentLoaded', () => {
             
             // --- Text Scramble Effect for Title ---
@@ -283,74 +287,107 @@
                 console.error("Title element #animated-title not found");
             }
 
-            // --- 3D Particle Background ---
-            // Check if THREE.js is loaded
-            if (typeof THREE === 'undefined') {
-                console.error("THREE.js library not loaded.");
-                return;
-            }
+            // --- REMOVED: 3D Particle Background Script ---
 
-            const canvas = document.getElementById('bg-canvas');
-            if (!canvas) {
-                console.error("Canvas element #bg-canvas not found");
-                return;
-            }
-            
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: false }); // alpha: false for performance
-            
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 1); // Set background to solid black
+            // --- ADDED: Interactive Dot Grid Background ---
+            const canvas = document.getElementById('dot-grid-canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
 
-            // Create particles
-            const particleGeometry = new THREE.BufferGeometry();
-            const particleCount = 5000;
-            const positions = new Float32Array(particleCount * 3);
+                let mouse = { x: -1000, y: -1000 }; // Start mouse off-screen
+                const gridSpacing = 20;
+                const dotRadius = 1;
+                const hoverRadius = 100; // How close the mouse needs to be to affect dots
+                const maxDotRadius = 3; // Max size of dot on hover
+                const dotColor = "rgba(255, 255, 255, 0.2)";
+                const hoverDotColor = "rgba(255, 255, 255, 0.7)";
 
-            for (let i = 0; i < particleCount * 3; i++) {
-                positions[i] = (Math.random() - 0.5) * 10; // Distribute in a 10x10x10 cube
-            }
-            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
-            // Particle material (using Manochitra green)
-            const particleMaterial = new THREE.PointsMaterial({
-                color: 0x0eDB33, // This is rgb(14, 219, 51)
-                size: 0.02,
-                transparent: true,
-                opacity: 0.7
-            });
-            
-            const particles = new THREE.Points(particleGeometry, particleMaterial);
-            scene.add(particles);
+                function setCanvasSize() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
 
-            camera.position.z = 5;
+                function drawGrid() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Animation loop
-            function animate() {
-                requestAnimationFrame(animate);
-                
-                // Rotate the particle system
-                particles.rotation.x += 0.0005;
-                particles.rotation.y += 0.0008;
-                
-                renderer.render(scene, camera);
+                    // --- ADDED: Set permanent shine properties ---
+                    ctx.shadowBlur = 8; // Constant glow
+                    ctx.shadowColor = 'rgba(255, 255, 255, 0.5)'; // Constant glow color
+
+                    for (let x = 0; x < canvas.width; x += gridSpacing) {
+                        for (let y = 0; y < canvas.height; y += gridSpacing) {
+                            
+                            const dx = x - mouse.x;
+                            const dy = y - mouse.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+
+                            const radius = dotRadius;
+                            let color = dotColor;
+
+                            if (dist < hoverRadius) {
+                                // Calculate radius and opacity based on distance
+                                const proximity = 1 - (dist / hoverRadius); // 1 when close, 0 when at edge
+                                const radius = dotRadius + (maxDotRadius - dotRadius) * proximity;
+                                const opacity = 0.2 + (0.7 - 0.2) * proximity;
+                                
+                                // --- REMOVED: Shine/Glow effect from here ---
+                                ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+                                
+                                ctx.beginPath();
+                                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                                ctx.fill();
+
+                                // --- REMOVED: Reset shadow for next dot ---
+
+                            } else {
+                                // --- REMOVED: Ensure: No shadow ---
+                                ctx.fillStyle = dotColor;
+
+                                ctx.beginPath();
+                                ctx.arc(x, y, dotRadius, 0, 2 * Math.PI);
+                                ctx.fill();
+                            }
+                        }
+                    }
+                }
+
+                function animate() {
+                    drawGrid();
+                    requestAnimationFrame(animate);
+                }
+
+                // --- Event Listeners ---
+                window.addEventListener('resize', () => {
+                    setCanvasSize();
+                    drawGrid(); // Redraw immediately on resize
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    mouse.x = e.clientX;
+                    mouse.y = e.clientY;
+                });
+
+                window.addEventListener('mouseout', () => { // Move dots off-screen when mouse leaves
+                    mouse.x = -1000;
+                    mouse.y = -1000;
+                });
+
+                // --- Init ---
+                setCanvasSize();
+                animate(); // Start the animation loop
+
+            } else {
+                console.error("Canvas element #dot-grid-canvas not found");
             }
-            
-            // Handle window resize
-            function onWindowResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-            
-            window.addEventListener('resize', onWindowResize, false);
-            
-            animate(); // Start the animation
         });
 
     </script>
 
 </body>
 </html>
+
+
+
+
+
 
