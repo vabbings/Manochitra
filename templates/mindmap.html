@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .link { fill: none; stroke: #9ca3af; stroke-width: 2px; }
+        .node-box { cursor: pointer; }
+        .node-rect { fill: #ffffff; stroke: #3b82f6; stroke-width: 1.5px; rx: 8; ry: 8; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08)); }
+        .node-title { font-size: 14px; font-weight: 600; fill: #1f2937; }
+        .node-desc { font-size: 12px; fill: #4b5563; }
+        .root .node-rect { stroke: #1d4ed8; }
+        
+        /* Mindmap zoom and pan styles */
+        #canvas {
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+        
+        #svg {
+            display: block;
+            transform-origin: 0 0;
+            transition: transform 0.1s;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .zoom-btn {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .zoom-btn:hover {
+            background: #f5f5f5;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name) || '';
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto p-4 md:p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+                <a href="/frontpage" class="inline-flex items-center px-3 py-2 rounded-md bg-white shadow text-sm font-medium text-gray-700 hover:bg-gray-50">← Back</a>
+                <h1 id="title" class="text-xl md:text-2xl font-semibold text-gray-900">Mind Map</h1>
+            </div>
+            <div class="flex gap-2">
+                <input id="topic-input" type="text" placeholder="Enter a topic..." class="hidden md:block border border-gray-300 rounded-md px-3 py-2 w-80" />
+                <button id="generate-btn" class="hidden md:inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Regenerate</button>
+            </div>
+        </div>
+
+        <div id="message" class="hidden mb-4 p-3 rounded bg-yellow-50 text-yellow-800"></div>
+
+        <div id="canvas" class="bg-white rounded-lg shadow overflow-hidden relative" style="height: 75vh;">
+            <div class="zoom-controls">
+                <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
+                <button id="zoom-out" class="zoom-btn" title="Zoom Out">-</button>
+                <button id="reset-zoom" class="zoom-btn" title="Reset">⟲</button>
+            </div>
+            <svg id="svg" width="100%" height="100%"></svg>
+        </div>
+        <div id="legend" class="mt-4 text-sm text-gray-600">
+            Tip: Click nodes to expand/collapse. Click labels to open Learn More.
+        </div>
+    </div>
+
+    <script>
+        const topicFromQuery = getQueryParam('topic');
+        const pdfFromQuery = getQueryParam('pdf');
+        const titleEl = document.getElementById('title');
+        const topicInput = document.getElementById('topic-input');
+        const generateBtn = document.getElementById('generate-btn');
+        const messageEl = document.getElementById('message');
+
+        if (topicFromQuery) {
+            titleEl.textContent = `Mind Map: ${topicFromQuery}`;
+        }
+        topicInput.value = topicFromQuery || '';
+
+        generateBtn.addEventListener('click', () => {
+            const t = topicInput.value.trim();
+            if (t) {
+                window.location.href = `/mindmap?topic=${encodeURIComponent(t)}`;
+            }
+        });
+
+        async function fetchMindMap(topic, pdfId = null) {
+            try {
+                const apiBase = window.location.origin; // ensure same origin/port
+                let res;
+                
+                // Check if this is a PDF-generated mindmap
+                if (pdfId) {
+                    res = await fetch(`${apiBase}/api/pdf-mindmap/${pdfId}`);
+                } else {
+                    res = await fetch(`${apiBase}/api/mindmap?topic=${encodeURIComponent(topic)}`);
+                }
+                
+                const contentType = res.headers.get('content-type');
+                
+                // Check if response is JSON
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await res.json();
+                    if (!res.ok) {
+                        throw new Error(data.error || `Server error: ${res.status} ${res.statusText}`);
+                    }
+                    return data;
+                } else {
+                    // Handle non-JSON response (likely an HTML error page)
+                    const text = await res.text();
+                    if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<html')) {
+                        throw new Error('Server returned an HTML error page. Ensure the Flask server is running on the same port as this page.');
+                    }
+                    throw new Error(`Unexpected response format: ${text.substring(0, 100)}...`);
+                }
+            } catch (e) {
+                const errorMsg = e.message || 'Failed to fetch mind map. Please check your connection and try again.';
+                console.error('Error fetching mind map:', e);
+                showMessage(errorMsg);
+                throw e;
+            }
+        }
+
+        function showMessage(text) {
+            messageEl.textContent = text;
+            messageEl.classList.remove('hidden');
+        }
+
+        function toD3Hierarchy(root) {
+            // Ensure every node has children array
+            const normalize = (node) => ({
+                title: node.title || 'Untitled',
+                image: node.image || '',
+                learn_more: node.learn_more || '',
+                description: node.description || node.summary || '',
+                children: (node.children || []).map(normalize)
+            });
+            return normalize(root);
+        }
+
+        function renderMindMap(data) {
+            const svg = d3.select('#svg');
+            svg.selectAll('*').remove();
+
+            const fullWidth = svg.node().clientWidth;
+            const fullHeight = svg.node().clientHeight;
+            const margin = { top: 20, right: 40, bottom: 20, left: 40 };
+            const width = fullWidth - margin.left - margin.right;
+            const height = fullHeight - margin.top - margin.bottom;
+
+            const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+            const rootData = toD3Hierarchy(data.root);
+            const root = d3.hierarchy(rootData, d => d.children);
+
+            const tree = d3.tree()
+                .nodeSize([80, 260]) // vertical spacing, horizontal spacing
+                .separation((a,b) => (a.parent === b.parent ? 1 : 1.4));
+
+            tree(root);
+
+            // Compute extents to center the whole layout
+            const nodesAll = root.descendants();
+            const xExtent = d3.extent(nodesAll, d => d.x);
+            const yExtent = d3.extent(nodesAll, d => d.y);
+
+            const BOX_W = 300; // wider boxes
+            // dynamic height based on bullets/description will be computed per node
+            const layoutWidth = (yExtent[1] - yExtent[0]) + BOX_W;
+            const defaultBoxH = 68;
+            const layoutHeight = (xExtent[1] - xExtent[0]) + defaultBoxH;
+            const shiftX = (width - layoutWidth) / 2 - yExtent[0];   // horizontal
+            const shiftY = (height - layoutHeight) / 2 - xExtent[0]; // vertical
+
+            const px = d => d.y + shiftX; // x-position (left/right)
+            const py = d => d.x + shiftY; // y-position (top/bottom)
+
+            // Links (elbow/diagonal)
+            const link = g.selectAll('path.link')
+                .data(root.links())
+                .enter()
+                .append('path')
+                .attr('class', 'link')
+                .attr('d', d => `M${px(d.source)+BOX_W},${py(d.source)}
+                                 C${px(d.source)+BOX_W+40},${py(d.source)}
+                                  ${px(d.target)-40},${py(d.target)}
+                                  ${px(d.target)},${py(d.target)}`);
+
+            // Nodes as boxes
+            const node = g.selectAll('g.node-box')
+                .data(root.descendants())
+                .enter()
+                .append('g')
+                .attr('class', d => `node-box ${d.depth === 0 ? 'root' : ''}`)
+                .attr('transform', d => `translate(${px(d)},${py(d)})`)
+                .on('click', (_, d) => {
+                    if (d.children) { d._children = d.children; d.children = null; }
+                    else { d.children = d._children; d._children = null; }
+                });
+
+            // compute dynamic height per node
+            node.each(function(d){
+                const bullets = d.data.bulletPoints || d.data.bullets || [];
+                const hasDesc = (d.data.description && d.data.description.trim().length > 0);
+                const lines = bullets.length > 0 ? Math.min(6, bullets.length) : (hasDesc ? Math.ceil(Math.min(120, d.data.description.length)/40) : 0);
+                d.boxH = 36 + (lines > 0 ? (lines * 16 + 8) : 0);
+                if (d.boxH < 52) d.boxH = 52;
+            });
+
+            node.append('rect')
+                .attr('class', 'node-rect')
+                .attr('width', BOX_W)
+                .attr('height', d => d.boxH);
+
+            node.append('text')
+                .attr('class', 'node-title')
+                .attr('x', 12)
+                .attr('y', 22)
+                .text(d => d.data.title);
+
+            const desc = node.append('text')
+                .attr('class', 'node-desc')
+                .attr('x', 12)
+                .attr('y', 38);
+
+            desc.each(function(d){
+                const group = d3.select(this);
+                const bullets = d.data.bulletPoints || d.data.bullets || [];
+                if (bullets.length > 0) {
+                    bullets.slice(0,6).forEach((b, i) => {
+                        group.append('tspan')
+                            .attr('x', 12)
+                            .attr('dy', i === 0 ? 0 : 16)
+                            .text(`• ${b}`);
+                    });
+                } else if (d.data.description) {
+                    const words = d.data.description.split(/\s+/);
+                    let line = '';
+                    let lineCount = 0;
+                    words.forEach(w => {
+                        const test = (line + ' ' + w).trim();
+                        if (test.length > 40) {
+                            group.append('tspan').attr('x',12).attr('dy', lineCount===0?0:16).text(line.trim());
+                            line = w;
+                            lineCount++;
+                        } else {
+                            line += ' ' + w;
+                        }
+                    });
+                    if (line.trim().length) {
+                        group.append('tspan').attr('x',12).attr('dy', lineCount===0?0:16).text(line.trim());
+                    }
+                }
+            });
+
+            // Click on title to open Learn More
+            node.on('dblclick', (event, d) => {
+                event.stopPropagation();
+                const url = d.data.learn_more || '';
+                if (url) window.open(url, '_blank');
+            });
+        }
+
+        // Initialize zoom and pan functionality
+        function initZoomAndPan() {
+            const svg = document.getElementById('svg');
+            const zoomInBtn = document.getElementById('zoom-in');
+            const zoomOutBtn = document.getElementById('zoom-out');
+            const resetBtn = document.getElementById('reset-zoom');
+            
+            let scale = 1;
+            let isPanning = false;
+            let startPoint = { x: 0, y: 0 };
+            let translate = { x: 0, y: 0 };
+            
+            // Update SVG transform
+            function updateTransform() {
+                svg.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${scale})`;
+            }
+            
+            // Zoom in/out functions
+            function zoom(delta) {
+                const rect = svg.getBoundingClientRect();
+                const mouseX = rect.width / 2;
+                const mouseY = rect.height / 2;
+                
+                const newScale = Math.max(0.5, Math.min(3, scale + delta));
+                
+                // Calculate new translate to zoom toward mouse position
+                const scaleChange = newScale / scale;
+                translate.x = mouseX - (mouseX - translate.x) * scaleChange;
+                translate.y = mouseY - (mouseY - translate.y) * scaleChange;
+                
+                scale = newScale;
+                updateTransform();
+            }
+            
+            // Event listeners for zoom buttons
+            zoomInBtn.addEventListener('click', () => zoom(0.2));
+            zoomOutBtn.addEventListener('click', () => zoom(-0.2));
+            resetBtn.addEventListener('click', () => {
+                scale = 1;
+                translate = { x: 0, y: 0 };
+                updateTransform();
+            });
+            
+            // Mouse wheel for zooming
+            svg.parentElement.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = -e.deltaY * 0.001;
+                zoom(delta);
+            }, { passive: false });
+            
+            // Mouse events for panning
+            svg.addEventListener('mousedown', (e) => {
+                if (e.button === 0) { // Left mouse button
+                    isPanning = true;
+                    startPoint = { x: e.clientX - translate.x, y: e.clientY - translate.y };
+                    svg.style.cursor = 'grabbing';
+                }
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                
+                translate.x = e.clientX - startPoint.x;
+                translate.y = e.clientY - startPoint.y;
+                updateTransform();
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isPanning = false;
+                svg.style.cursor = 'grab';
+            });
+            
+            // Touch events for mobile
+            let touchStartDistance = 0;
+            
+            svg.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    // Calculate initial distance between two fingers for pinch-to-zoom
+                    touchStartDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                } else if (e.touches.length === 1) {
+                    // Single touch for panning
+                    isPanning = true;
+                    startPoint = {
+                        x: e.touches[0].clientX - translate.x,
+                        y: e.touches[0].clientY - translate.y
+                    };
+                }
+            }, { passive: false });
+            
+            svg.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                
+                if (e.touches.length === 2) {
+                    // Pinch-to-zoom
+                    const touchEndDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    const delta = (touchEndDistance - touchStartDistance) * 0.01;
+                    zoom(delta);
+                    touchStartDistance = touchEndDistance;
+                } else if (e.touches.length === 1 && isPanning) {
+                    // Pan with one finger
+                    translate.x = e.touches[0].clientX - startPoint.x;
+                    translate.y = e.touches[0].clientY - startPoint.y;
+                    updateTransform();
+                }
+            }, { passive: false });
+            
+            svg.addEventListener('touchend', () => {
+                isPanning = false;
+            });
+            
+            // Set initial cursor
+            svg.style.cursor = 'grab';
+        }
+        
+        (async function init() {
+            const t = topicFromQuery || 'Sample Topic';
+            const pdfId = pdfFromQuery || null;
+            if (!topicFromQuery && !pdfId) showMessage('No topic or PDF provided. Using a sample.');
+            try {
+                const data = await fetchMindMap(t, pdfId);
+                renderMindMap(data);
+                // Initialize zoom and pan after rendering
+                initZoomAndPan();
+            } catch (e) {
+                // message already shown
+            }
+        })();
+    </script>
+</body>
+</html>
+
