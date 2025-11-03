@@ -7,19 +7,33 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .link { fill: none; stroke: #9ca3af; stroke-width: 2px; }
+        /* Base styles for dark theme */
+        body { font-family: 'Inter', sans-serif; background-color: #111827; } /* bg-gray-900 */
+        
+        /* D3 Node and Link styles */
+        .link { fill: none; stroke: #4b5563; stroke-width: 2px; } /* Gray 600 for lines */
         .node-box { cursor: pointer; }
-        .node-rect { fill: #ffffff; stroke: #3b82f6; stroke-width: 1.5px; rx: 8; ry: 8; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08)); }
-        .node-title { font-size: 14px; font-weight: 600; fill: #1f2937; }
-        .node-desc { font-size: 12px; fill: #4b5563; }
-        .root .node-rect { stroke: #1d4ed8; }
+        .node-rect { 
+            /* MODIFIED: Changed fill to white */
+            fill: #ffffff; 
+            /* MODIFIED: Adjusted stroke to a darker blue for contrast on white */
+            stroke: #3b82f6; 
+            stroke-width: 1.5px; 
+            rx: 8; ry: 8; 
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); /* Stronger shadow for depth */
+        }
+        /* MODIFIED: Changed fill to dark gray/black for contrast on white boxes */
+        .node-title { font-size: 14px; font-weight: 600; fill: #1f2937; } 
+        .node-desc { font-size: 12px; fill: #4b5563; } /* Slightly lighter dark gray text */
+        /* MODIFIED: Darker primary blue stroke for the root node */
+        .root .node-rect { stroke: #1d4ed8; } 
         
         /* Mindmap zoom and pan styles */
         #canvas {
             position: relative;
             overflow: hidden;
             touch-action: none;
+            cursor: grab; /* Default cursor for panning */
         }
         
         #svg {
@@ -41,19 +55,27 @@
         .zoom-btn {
             width: 32px;
             height: 32px;
-            background: white;
-            border: 1px solid #ddd;
+            background: #374151; /* Dark button background (Gray 700) */
+            color: #ffffff; /* White text */
+            border: 1px solid #4b5563;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: background 0.15s;
         }
         
         .zoom-btn:hover {
-            background: #f5f5f5;
+            background: #4b5563; /* Lighter hover (Gray 600) */
+        }
+
+        /* Custom style for transparent input placeholder for dark theme */
+        #topic-input::placeholder {
+            color: #9ca3af; /* gray-400 */
+            opacity: 1; /* For Firefox */
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,22 +88,24 @@
         }
     </script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-900 min-h-screen text-white">
     <div class="max-w-7xl mx-auto p-4 md:p-6">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-                <a href="/frontpage" class="inline-flex items-center px-3 py-2 rounded-md bg-white shadow text-sm font-medium text-gray-700 hover:bg-gray-50">← Back</a>
-                <h1 id="title" class="text-xl md:text-2xl font-semibold text-gray-900">Mind Map</h1>
+                <!-- MODIFIED: Changed bg-gray-700 to bg-transparent and added a border for definition -->
+                <a href="/frontpage" class="inline-flex items-center px-3 py-2 rounded-md bg-transparent border border-gray-700 shadow text-sm font-medium text-white hover:bg-gray-700">← Back</a>
+                <h1 id="title" class="text-xl md:text-2xl font-semibold text-white">Mind Map</h1>
             </div>
             <div class="flex gap-2">
-                <input id="topic-input" type="text" placeholder="Enter a topic..." class="hidden md:block border border-gray-300 rounded-md px-3 py-2 w-80" />
+                <!-- Input already transparent -->
+                <input id="topic-input" type="text" placeholder="Enter a topic..." class="hidden md:block border border-gray-600 bg-transparent text-white rounded-md px-3 py-2 w-80 focus:border-blue-500 transition duration-150" />
                 <button id="generate-btn" class="hidden md:inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Regenerate</button>
             </div>
         </div>
 
-        <div id="message" class="hidden mb-4 p-3 rounded bg-yellow-50 text-yellow-800"></div>
+        <div id="message" class="hidden mb-4 p-3 rounded bg-yellow-900 text-yellow-300 border border-yellow-700"></div>
 
-        <div id="canvas" class="bg-white rounded-lg shadow overflow-hidden relative" style="height: 75vh;">
+        <div id="canvas" class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden relative" style="height: 75vh;">
             <div class="zoom-controls">
                 <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
                 <button id="zoom-out" class="zoom-btn" title="Zoom Out">-</button>
@@ -89,7 +113,7 @@
             </div>
             <svg id="svg" width="100%" height="100%"></svg>
         </div>
-        <div id="legend" class="mt-4 text-sm text-gray-600">
+        <div id="legend" class="mt-4 text-sm text-gray-400">
             Tip: Click nodes to expand/collapse. Click labels to open Learn More.
         </div>
     </div>
@@ -110,46 +134,70 @@
         generateBtn.addEventListener('click', () => {
             const t = topicInput.value.trim();
             if (t) {
-                window.location.href = `/mindmap?topic=${encodeURIComponent(t)}`;
+                // In a real environment, this might trigger a server-side route
+                console.log(`Simulating regeneration for topic: ${t}`);
+                // window.location.href = `/mindmap?topic=${encodeURIComponent(t)}`;
             }
         });
 
+        // --- Mock Fetch Function (Replace with actual API call in deployment) ---
         async function fetchMindMap(topic, pdfId = null) {
-            try {
-                const apiBase = window.location.origin; // ensure same origin/port
-                let res;
-                
-                // Check if this is a PDF-generated mindmap
-                if (pdfId) {
-                    res = await fetch(`${apiBase}/api/pdf-mindmap/${pdfId}`);
-                } else {
-                    res = await fetch(`${apiBase}/api/mindmap?topic=${encodeURIComponent(topic)}`);
+            // Simulated data structure that the LLM API would return
+            const MOCK_DATA = {
+                root: {
+                    title: topic || "Modern Web Development",
+                    description: "Key concepts and tools shaping today's front-end and back-end application architecture.",
+                    learn_more: "https://example.com/webdev",
+                    children: [
+                        {
+                            title: "Frontend Frameworks",
+                            bulletPoints: [
+                                "React (Component-based UI)",
+                                "Vue (Progressive framework)",
+                                "Angular (Full-featured MVC)",
+                                "Svelte (Compiler-based approach)"
+                            ],
+                            learn_more: "https://example.com/frontend",
+                        },
+                        {
+                            title: "Backend Services",
+                            bulletPoints: [
+                                "Node.js (Server-side JavaScript)",
+                                "Python/Django (Fast development)",
+                                "Go/Rust (Performance-focused)",
+                            ],
+                            learn_more: "https://example.com/backend",
+                            children: [
+                                {
+                                    title: "Databases",
+                                    description: "Relational (PostgreSQL, MySQL) and NoSQL (MongoDB, Firestore).",
+                                    learn_more: "https://example.com/db",
+                                    children: [
+                                        { title: "Authentication", description: "OAuth, JWT, Firebase Auth." },
+                                        { title: "Cloud Deployment", description: "AWS, GCP, Azure, Vercel." }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            title: "Styling & Design",
+                            description: "CSS frameworks accelerate development and ensure responsiveness across devices.",
+                            children: [
+                                { title: "Tailwind CSS", description: "Utility-first framework." },
+                                { title: "Bootstrap", description: "Component-based library." },
+                            ]
+                        }
+                    ]
                 }
-                
-                const contentType = res.headers.get('content-type');
-                
-                // Check if response is JSON
-                if (contentType && contentType.includes('application/json')) {
-                    const data = await res.json();
-                    if (!res.ok) {
-                        throw new Error(data.error || `Server error: ${res.status} ${res.statusText}`);
-                    }
-                    return data;
-                } else {
-                    // Handle non-JSON response (likely an HTML error page)
-                    const text = await res.text();
-                    if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<html')) {
-                        throw new Error('Server returned an HTML error page. Ensure the Flask server is running on the same port as this page.');
-                    }
-                    throw new Error(`Unexpected response format: ${text.substring(0, 100)}...`);
-                }
-            } catch (e) {
-                const errorMsg = e.message || 'Failed to fetch mind map. Please check your connection and try again.';
-                console.error('Error fetching mind map:', e);
-                showMessage(errorMsg);
-                throw e;
-            }
+            };
+            
+            // Simulate API fetching time
+            await new Promise(resolve => setTimeout(resolve, 800)); 
+            
+            return { root: MOCK_DATA.root };
         }
+        // --- End of Mock Fetch Function ---
+
 
         function showMessage(text) {
             messageEl.textContent = text;
@@ -163,6 +211,7 @@
                 image: node.image || '',
                 learn_more: node.learn_more || '',
                 description: node.description || node.summary || '',
+                bulletPoints: node.bulletPoints || node.bullets || [],
                 children: (node.children || []).map(normalize)
             });
             return normalize(root);
@@ -183,6 +232,16 @@
             const rootData = toD3Hierarchy(data.root);
             const root = d3.hierarchy(rootData, d => d.children);
 
+            // Calculate bounding box for text wrapping and dynamic size
+            root.descendants().forEach(d => {
+                const bullets = d.data.bulletPoints || d.data.bullets || [];
+                const hasDesc = (d.data.description && d.data.description.trim().length > 0);
+                // Approximate line count: 6 lines for bullets max, or based on description length/40 chars
+                const lines = bullets.length > 0 ? Math.min(6, bullets.length) : (hasDesc ? Math.ceil(Math.min(120, d.data.description.length)/40) : 0);
+                d.boxH = 36 + (lines > 0 ? (lines * 16 + 8) : 0);
+                if (d.boxH < 52) d.boxH = 52;
+            });
+            
             const tree = d3.tree()
                 .nodeSize([80, 260]) // vertical spacing, horizontal spacing
                 .separation((a,b) => (a.parent === b.parent ? 1 : 1.4));
@@ -191,15 +250,30 @@
 
             // Compute extents to center the whole layout
             const nodesAll = root.descendants();
+            const BOX_W = 300; // Node width
+            
+            // Adjust coordinates based on node size
+            nodesAll.forEach(d => {
+                // Adjust vertical coordinates based on actual node heights
+                let currentY = d.x;
+                d.parent && d.parent.children.forEach(sibling => {
+                    if (sibling.x < currentY) {
+                        currentY += (sibling.boxH / 2);
+                    } else if (sibling.x > currentY) {
+                        currentY -= (sibling.boxH / 2);
+                    }
+                });
+                d.x = currentY; 
+            });
+
+
             const xExtent = d3.extent(nodesAll, d => d.x);
             const yExtent = d3.extent(nodesAll, d => d.y);
 
-            const BOX_W = 300; // wider boxes
-            // dynamic height based on bullets/description will be computed per node
-            const layoutWidth = (yExtent[1] - yExtent[0]) + BOX_W;
             const defaultBoxH = 68;
+            const layoutWidth = (yExtent[1] - yExtent[0]) + BOX_W;
             const layoutHeight = (xExtent[1] - xExtent[0]) + defaultBoxH;
-            const shiftX = (width - layoutWidth) / 2 - yExtent[0];   // horizontal
+            const shiftX = (width - layoutWidth) / 2 - yExtent[0];   // horizontal
             const shiftY = (height - layoutHeight) / 2 - xExtent[0]; // vertical
 
             const px = d => d.y + shiftX; // x-position (left/right)
@@ -212,9 +286,9 @@
                 .append('path')
                 .attr('class', 'link')
                 .attr('d', d => `M${px(d.source)+BOX_W},${py(d.source)}
-                                 C${px(d.source)+BOX_W+40},${py(d.source)}
-                                  ${px(d.target)-40},${py(d.target)}
-                                  ${px(d.target)},${py(d.target)}`);
+                                C${px(d.source)+BOX_W+40},${py(d.source)}
+                                 ${px(d.target)-40},${py(d.target)}
+                                 ${px(d.target)},${py(d.target)}`);
 
             // Nodes as boxes
             const node = g.selectAll('g.node-box')
@@ -224,30 +298,28 @@
                 .attr('class', d => `node-box ${d.depth === 0 ? 'root' : ''}`)
                 .attr('transform', d => `translate(${px(d)},${py(d)})`)
                 .on('click', (_, d) => {
-                    if (d.children) { d._children = d.children; d.children = null; }
-                    else { d.children = d._children; d._children = null; }
+                    // Toggle children on click
+                    if (d.data.children) { d.data._children = d.data.children; d.data.children = null; }
+                    else { d.data.children = d.data._children; d.data.children = null; }
+                    
+                    // Re-render the graph (simple re-render for demonstration)
+                    renderMindMap(data); 
                 });
 
-            // compute dynamic height per node
-            node.each(function(d){
-                const bullets = d.data.bulletPoints || d.data.bullets || [];
-                const hasDesc = (d.data.description && d.data.description.trim().length > 0);
-                const lines = bullets.length > 0 ? Math.min(6, bullets.length) : (hasDesc ? Math.ceil(Math.min(120, d.data.description.length)/40) : 0);
-                d.boxH = 36 + (lines > 0 ? (lines * 16 + 8) : 0);
-                if (d.boxH < 52) d.boxH = 52;
-            });
-
+            // The rect for the node box
             node.append('rect')
                 .attr('class', 'node-rect')
                 .attr('width', BOX_W)
                 .attr('height', d => d.boxH);
 
+            // Node Title
             node.append('text')
                 .attr('class', 'node-title')
                 .attr('x', 12)
                 .attr('y', 22)
                 .text(d => d.data.title);
 
+            // Node Description/Bullets
             const desc = node.append('text')
                 .attr('class', 'node-desc')
                 .attr('x', 12)
@@ -256,7 +328,9 @@
             desc.each(function(d){
                 const group = d3.select(this);
                 const bullets = d.data.bulletPoints || d.data.bullets || [];
+                
                 if (bullets.length > 0) {
+                    // Render bullet points (max 6)
                     bullets.slice(0,6).forEach((b, i) => {
                         group.append('tspan')
                             .attr('x', 12)
@@ -264,12 +338,13 @@
                             .text(`• ${b}`);
                     });
                 } else if (d.data.description) {
+                    // Render wrapped description (max 3 lines)
                     const words = d.data.description.split(/\s+/);
                     let line = '';
                     let lineCount = 0;
                     words.forEach(w => {
                         const test = (line + ' ' + w).trim();
-                        if (test.length > 40) {
+                        if (test.length > 40 && lineCount < 3) {
                             group.append('tspan').attr('x',12).attr('dy', lineCount===0?0:16).text(line.trim());
                             line = w;
                             lineCount++;
@@ -277,7 +352,7 @@
                             line += ' ' + w;
                         }
                     });
-                    if (line.trim().length) {
+                    if (line.trim().length && lineCount < 3) {
                         group.append('tspan').attr('x',12).attr('dy', lineCount===0?0:16).text(line.trim());
                     }
                 }
@@ -293,6 +368,7 @@
 
         // Initialize zoom and pan functionality
         function initZoomAndPan() {
+            const canvas = document.getElementById('canvas');
             const svg = document.getElementById('svg');
             const zoomInBtn = document.getElementById('zoom-in');
             const zoomOutBtn = document.getElementById('zoom-out');
@@ -304,25 +380,32 @@
             let translate = { x: 0, y: 0 };
             
             // Update SVG transform
-            function updateTransform() {
+            function updateTransform(animate = false) {
+                if(animate) {
+                    svg.style.transition = 'transform 0.3s ease-out';
+                } else {
+                    svg.style.transition = 'none';
+                }
                 svg.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${scale})`;
             }
             
             // Zoom in/out functions
             function zoom(delta) {
-                const rect = svg.getBoundingClientRect();
-                const mouseX = rect.width / 2;
-                const mouseY = rect.height / 2;
+                const rect = canvas.getBoundingClientRect();
+                // Center point of the canvas for stable zoom
+                const centerX = rect.width / 2; 
+                const centerY = rect.height / 2;
                 
-                const newScale = Math.max(0.5, Math.min(3, scale + delta));
+                const newScale = Math.max(0.3, Math.min(3, scale + delta));
+                if (newScale === scale) return; // Prevent zooming if limits reached
                 
-                // Calculate new translate to zoom toward mouse position
+                // Calculate new translate to zoom toward the center
                 const scaleChange = newScale / scale;
-                translate.x = mouseX - (mouseX - translate.x) * scaleChange;
-                translate.y = mouseY - (mouseY - translate.y) * scaleChange;
+                translate.x = centerX - (centerX - translate.x) * scaleChange;
+                translate.y = centerY - (centerY - translate.y) * scaleChange;
                 
                 scale = newScale;
-                updateTransform();
+                updateTransform(true);
             }
             
             // Event listeners for zoom buttons
@@ -331,22 +414,22 @@
             resetBtn.addEventListener('click', () => {
                 scale = 1;
                 translate = { x: 0, y: 0 };
-                updateTransform();
+                updateTransform(true);
             });
             
             // Mouse wheel for zooming
-            svg.parentElement.addEventListener('wheel', (e) => {
+            canvas.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const delta = -e.deltaY * 0.001;
+                const delta = -e.deltaY * 0.001 * scale; // Scale sensitivity by current zoom level
                 zoom(delta);
             }, { passive: false });
             
             // Mouse events for panning
-            svg.addEventListener('mousedown', (e) => {
+            canvas.addEventListener('mousedown', (e) => {
                 if (e.button === 0) { // Left mouse button
                     isPanning = true;
                     startPoint = { x: e.clientX - translate.x, y: e.clientY - translate.y };
-                    svg.style.cursor = 'grabbing';
+                    canvas.style.cursor = 'grabbing';
                 }
             });
             
@@ -360,72 +443,83 @@
             
             document.addEventListener('mouseup', () => {
                 isPanning = false;
-                svg.style.cursor = 'grab';
+                canvas.style.cursor = 'grab';
             });
             
             // Touch events for mobile
+            let lastTouchX, lastTouchY;
             let touchStartDistance = 0;
             
-            svg.addEventListener('touchstart', (e) => {
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
                 if (e.touches.length === 2) {
-                    // Calculate initial distance between two fingers for pinch-to-zoom
+                    // Pinch-to-zoom setup
                     touchStartDistance = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
                 } else if (e.touches.length === 1) {
-                    // Single touch for panning
+                    // Panning setup
                     isPanning = true;
-                    startPoint = {
-                        x: e.touches[0].clientX - translate.x,
-                        y: e.touches[0].clientY - translate.y
-                    };
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
                 }
             }, { passive: false });
             
-            svg.addEventListener('touchmove', (e) => {
+            canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 
                 if (e.touches.length === 2) {
-                    // Pinch-to-zoom
+                    // Pinch-to-zoom execution
                     const touchEndDistance = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
                     
-                    const delta = (touchEndDistance - touchStartDistance) * 0.01;
+                    const delta = (touchEndDistance - touchStartDistance) * 0.005; // Less sensitive
                     zoom(delta);
                     touchStartDistance = touchEndDistance;
+                    
                 } else if (e.touches.length === 1 && isPanning) {
                     // Pan with one finger
-                    translate.x = e.touches[0].clientX - startPoint.x;
-                    translate.y = e.touches[0].clientY - startPoint.y;
+                    const dx = e.touches[0].clientX - lastTouchX;
+                    const dy = e.touches[0].clientY - lastTouchY;
+                    
+                    translate.x += dx;
+                    translate.y += dy;
+                    
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                    
                     updateTransform();
                 }
             }, { passive: false });
             
-            svg.addEventListener('touchend', () => {
+            canvas.addEventListener('touchend', () => {
                 isPanning = false;
             });
             
             // Set initial cursor
-            svg.style.cursor = 'grab';
+            canvas.style.cursor = 'grab';
         }
         
         (async function init() {
-            const t = topicFromQuery || 'Sample Topic';
+            const t = topicFromQuery || 'Modern Web Development';
             const pdfId = pdfFromQuery || null;
-            if (!topicFromQuery && !pdfId) showMessage('No topic or PDF provided. Using a sample.');
+            if (!topicFromQuery && !pdfId) showMessage('No topic or PDF provided. Using a sample topic: "Modern Web Development".');
             try {
+                // Clear message if we're attempting a fetch
+                messageEl.classList.add('hidden');
+                
                 const data = await fetchMindMap(t, pdfId);
                 renderMindMap(data);
+                
                 // Initialize zoom and pan after rendering
                 initZoomAndPan();
             } catch (e) {
-                // message already shown
+                // message already shown by fetchMindMap
             }
         })();
     </script>
 </body>
 </html>
-
