@@ -36,7 +36,7 @@
                  |-- bgimg.jpg   (your image)
             */
             background-color: #000000;
-            background-image: url('bgimg.jpg');
+            background-image: url('bgimg.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed; /* Keeps the background still on scroll */
@@ -59,13 +59,10 @@
         .title {
             /* Responsive font size: min 2rem, scales with 10% of viewport width, max 4rem */
             font-size: clamp(2rem, 10vw, 4rem);
-            color: #ffffff;
+            color: rgb(14, 219, 51);
             
             /* The grayish glow effect */
-            text-shadow: 
-                0 0 10px #AAAAAA,
-                0 0 20px #999999,
-                0 0 35px #888888;
+            
            margin-bottom: 15px; /* Reduced space to bring subtitle closer */
        }
 
@@ -223,7 +220,7 @@
    <!-- The main hero container (full screen) -->
    <div class="hero-section">
         <h1 class="title">ManoChitra</h1>
-       <p class="subtitle">AI Powered Visual Knowledge Mapper</p>
+       <p class="subtitle">"AI Powered Visual Knowledge Mapper"</p>
         <!-- Changed from <button> to <a> and added href="login.html" -->
         <a href="login.html" class="styled-button" id="getStartedButton">Get Started</a>
    </div>
